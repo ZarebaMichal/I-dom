@@ -58,7 +58,7 @@ ROOT_URLCONF = 'my_application.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -128,8 +128,12 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-
+# Setting authoriazation for customUser
 AUTH_USER_MODEL = 'register.CustomUser'
 
 CRISPY_TEMPLATE_PACK='boostrap4'
+
+# URLs for redirecting after login/logout
+LOGIN_REDIRECT_URL = '/index'
+LOGOUT_REDIRECT_URL = '/'
 
