@@ -1,4 +1,4 @@
-activate_this = 'C:/Users/user/Envs/my_application/Scripts/activate_this.py'
+activate_this = 'C:/Users/Foka/Envs/my_application/Scripts/activate_this.py'
 # execfile(activate_this, dict(__file__=activate_this))
 exec(open(activate_this).read(),dict(__file__=activate_this))
 
