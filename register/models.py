@@ -1,9 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
-
-
-
 from .managers import CustomUserManager
 
 class CustomUser(AbstractUser):
@@ -15,10 +11,10 @@ class CustomUser(AbstractUser):
     is_staff = models.BooleanField(default=False)
 
 
-    REQUIRED_FIELDS = ['email', 'telephone']
-
-    objects = CustomUserManager()
-
-    def _str_(self):
-        return self.username
+    # REQUIRED_FIELDS = ['email', 'telephone']
+    #
+    # objects = CustomUserManager()
+    #
+    # def _str_(self):
+    #     return self.username
 
