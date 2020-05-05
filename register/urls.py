@@ -3,5 +3,5 @@ from django.conf.urls import url, include
 from . import views
 
 urlpatterns = [
-    path('index', views.index, name='index')
+    path('register/', views.register_list, name='index')
 ]

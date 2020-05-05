@@ -38,7 +38,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('register/', v.register, name='register'),
+    #path('register/', v.register, name='register'),
     path('', include('django.contrib.auth.urls')),
     path('', include('register.urls')),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
