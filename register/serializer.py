@@ -4,8 +4,10 @@ from register.models import CustomUser
 
 class CustomUserSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
-    email = serializers.EmailField(unique=True)
-    telephone = serializers.CharField(unique=True)
+    password1 = serializers.CharField(write_only=True)
+    password2 = serializers.CharField(write_only=True)
+    email = serializers.EmailField(required=True)
+    telephone = serializers.CharField(required=True)
     sms_notifications = serializers.BooleanField(default=True)
     app_notifications = serializers.BooleanField(default=True)
     is_staff = serializers.BooleanField(default=False)
