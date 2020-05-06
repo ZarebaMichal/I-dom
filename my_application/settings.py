@@ -36,12 +36,19 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'rest_framework.authtoken',
     'crispy_forms',
     #'register.apps.RegisterConfig',
     'register',
     'django.contrib.staticfiles',
-    'rest_framework',
+    'drf_yasg',
+    'phonenumber_field',
     ]
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
