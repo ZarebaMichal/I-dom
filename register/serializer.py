@@ -20,7 +20,10 @@ class CustomUserSerializer(serializers.Serializer):
         :return: new user instance
         """
 
-        return CustomUser.objects.create(**validated_data)
+        return CustomUser.objects.create(username = validated_data.get('username'),
+                                         email = validated_data.get('email'),
+                                         password = validated_data.get('password1'),
+                                         telephone = validated_data.get('telephone'))
 
     def update(self, instance, validated_data):
         """
