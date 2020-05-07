@@ -19,11 +19,13 @@ class CustomUserSerializer(serializers.Serializer):
         :param validated_data:
         :return: new user instance
         """
-
-        return CustomUser.objects.create(username = validated_data.get('username'),
-                                         email = validated_data.get('email'),
-                                         password = validated_data.get('password1'),
-                                         telephone = validated_data.get('telephone'))
+        if validated_data.get('password1') != validated_data.get('password2'):
+            raise serializers.ValidationError('Those passwords do not match')
+        else:
+            return CustomUser.objects.create(username = validated_data.get('username'),
+                                            email = validated_data.get('email'),
+                                            password = validated_data.get('password1'),
+                                            telephone = validated_data.get('telephone'))
 
     def update(self, instance, validated_data):
         """
