@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from register.models import CustomUser
+from phonenumber_field.serializerfields import PhoneNumberField
 
 
 class CustomUserSerializer(serializers.Serializer):
@@ -7,10 +8,11 @@ class CustomUserSerializer(serializers.Serializer):
     password1 = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
     email = serializers.EmailField(required=True)
-    telephone = serializers.CharField(required=True)
+    telephone = PhoneNumberField(required=False)
     sms_notifications = serializers.BooleanField(default=True)
     app_notifications = serializers.BooleanField(default=True)
     is_staff = serializers.BooleanField(default=False)
+    is_active = serializers.BooleanField(default=True)
 
     def create(self, validated_data):
         """
