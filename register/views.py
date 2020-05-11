@@ -28,7 +28,7 @@ from register.serializer import CustomUserSerializer
 
 
 @api_view(['GET', 'POST'])
-def register_list(request, format=None):
+def register_list(request):
     """
     List all users, or create a new user.
     """
@@ -46,9 +46,9 @@ def register_list(request, format=None):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def register_detail(request, pk, format=None):
+def register_detail(request, pk):
     """
-    Retrieve, update or delete a code snippet.
+    Retrieve, update or delete user.
     """
     try:
         user = CustomUser.objects.get(pk=pk)
@@ -67,5 +67,6 @@ def register_detail(request, pk, format=None):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
-        user.delete()
+        user.is_active = False
+        user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'phonenumber_field',
     'django_rest_passwordreset',
     ]
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',

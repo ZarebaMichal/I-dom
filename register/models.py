@@ -11,8 +11,9 @@ class CustomUser(AbstractUser):
     sms_notifications = models.BooleanField(default=True)
     app_notifications = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
-    REQUIRED_FIELDS = ['email', 'telephone']
+    REQUIRED_FIELDS = ['email']
 
     objects = CustomUserManager()
 
