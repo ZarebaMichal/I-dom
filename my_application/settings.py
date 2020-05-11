@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'drf_yasg',
     'phonenumber_field',
+    'django_rest_passwordreset',
     ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -144,3 +145,13 @@ CRISPY_TEMPLATE_PACK='boostrap4'
 LOGIN_REDIRECT_URL = '/index'
 LOGOUT_REDIRECT_URL = '/'
 
+
+
+# Email configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'i.dom.industry@gmail.com'
+EMAIL_HOST_PASSWORD = 'inzynierka2020'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

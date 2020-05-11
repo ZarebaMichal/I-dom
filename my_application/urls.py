@@ -16,7 +16,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
-from register import views as v
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -39,9 +38,12 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    #path('register/', v.register, name='register'),
     path('', include('django.contrib.auth.urls')),
+
+
+    # API' urls
     path('', include('register.urls')),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('api-token-auth/', obtain_auth_token, name='api_token_auth')
+    path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
+    path('password-reset/', include('django_rest_passwordreset.urls', namespace='password_reset'))
 ]
