@@ -8,7 +8,7 @@ class CustomUserSerializer(serializers.Serializer):
     password1 = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
     email = serializers.EmailField(required=True)
-    telephone = PhoneNumberField(required=False)
+    telephone = PhoneNumberField(required=True)
     sms_notifications = serializers.BooleanField(default=True)
     app_notifications = serializers.BooleanField(default=True)
     is_staff = serializers.BooleanField(default=False)
