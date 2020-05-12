@@ -7,13 +7,13 @@ from .managers import CustomUserManager
 class CustomUser(AbstractUser):
     username = models.CharField(max_length=25, unique=True)
     email = models.EmailField(unique=True)
-    telephone = PhoneNumberField()
+    telephone = PhoneNumberField(blank=True)
     sms_notifications = models.BooleanField(default=True)
     app_notifications = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
-    REQUIRED_FIELDS = ['email']
+    REQUIRED_FIELDS = ['email', 'telephone']
 
     objects = CustomUserManager()
 
