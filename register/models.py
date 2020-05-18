@@ -7,7 +7,7 @@ from .managers import CustomUserManager
 class CustomUser(AbstractUser):
     username = models.CharField(max_length=25, unique=True)
     email = models.EmailField(unique=True)
-    telephone = PhoneNumberField(blank=True)
+    telephone = PhoneNumberField(blank=True, null=True)
     sms_notifications = models.BooleanField(default=True)
     app_notifications = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -19,4 +19,3 @@ class CustomUser(AbstractUser):
 
     def _str_(self):
         return self.username
-
