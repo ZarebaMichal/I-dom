@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from register.models import CustomUser
 from register.serializer import CustomUserSerializer
+from rest_framework.authtoken.models import Token
 
 
 @api_view(['GET', 'POST'])
@@ -48,3 +49,20 @@ def register_detail(request, pk):
         user.is_active = False
         user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['POST'])
+def logout_user(request, token):
+    """
+    Delete user's token. If token doesn't exist return 404,
+    else if token deleted, return 200
+    """
+    try:
+        token = Token.objects.get(key=token)
+    except Token.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    token.delete()
+    return Response(status=status.HTTP_200_OK)
+
+
