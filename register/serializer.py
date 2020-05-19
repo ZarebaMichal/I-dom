@@ -24,10 +24,13 @@ class CustomUserSerializer(serializers.Serializer):
         if validated_data.get('password1') != validated_data.get('password2'):
             raise serializers.ValidationError('Those passwords do not match')
         else:
-            return CustomUser.objects.create(username = validated_data.get('username'),
-                                            email = validated_data.get('email'),
-                                            password = validated_data.get('password1'),
-                                            telephone = validated_data.get('telephone'))
+            user = CustomUser.objects.create(username=validated_data.get('username'),
+                                             email=validated_data.get('email'),
+                                             password=validated_data.get('password1'),
+                                             telephone=validated_data.get('telephone'))
+            user.set_password(validated_data.get('password1'))
+            user.save()
+            return user
 
     def update(self, instance, validated_data):
         """
