@@ -1,28 +1,60 @@
+import json
+
+from register.models import CustomUser
+from django.urls import reverse
+
+from rest_framework.test import APITestCase
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
 
-class UsersManagersTests(TestCase):
+class CreateUserAPIViewTestCase(APITestCase):
 
-    def test_create_user(self):
-        User = get_user_model()
-        user = User.objects.create_user(username='Foka', email='xd@gmail.com', telephone='669938635', password='xdd')
-        self.assertEqual(user.email, 'xd@gmail.com')
-        self.assertEqual(user.username, 'Foka')
-        self.assertEqual(user.telephone, '669938635')
-        self.assertFalse(user.is_superuser)
-        with self.assertRaises(TypeError):
-            User.objects.create_user()
-        with self.assertRaises(TypeError):
-            User.objects.create_user(email='')
-        with self.assertRaises(ValueError):
-            User.objects.create_user(username='', email='', telephone='', password="foo")
+    def test_user_create(self):
+        """
+        Test to verify if with validate data everything is ok
+        """
 
-    def test_create_superuser(self):
-        User = get_user_model()
-        admin_user = User.objects.create_superuser('superusers', 'super@user.com', 'foo', '545454545')
-        self.assertEqual(admin_user.email, 'super@user.com')
-        self.assertTrue(admin_user.is_superuser)
-        with self.assertRaises(ValueError):
-            User.objects.create_superuser(
-               username='superusers', email='super@user.com', password='foo', telephone='545454545', is_superuser=False)
+        user_data = {
+            'username': 'testuser',
+            'email': 'test1@test.pl',
+            'password1': 'test',
+            'password2': 'test',
+            'telephone': ''
+        }
+
+        response = self.client.post('/register/', user_data)
+        self.assertEqual(201, response.status_code)
+
+    def test_wrong_password(self):
+        """
+        Test of creating user with wrong password
+        """
+
+        user_data = {
+            'username': 'testuser',
+            'email': 'test1@test.pl',
+            'password1': 'test',
+            'password2': 'test123',
+            'telephone': ''
+        }
+
+        response = self.client.post('/register/', user_data)
+        self.assertEqual(400, response.status_code)
+
+    def test_wrong_email(self):
+        """
+        Test of creating user with wrong email
+        """
+
+        user_data = {
+            'username': 'testuser',
+            'email': 'test',
+            'password1': 'test',
+            'password2': 'test',
+            'telephone': ''
+        }
+
+        response = self.client.post('/register/', user_data)
+        self.assertEqual(400, response.status_code)
