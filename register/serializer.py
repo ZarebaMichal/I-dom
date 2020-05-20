@@ -4,6 +4,7 @@ from phonenumber_field.serializerfields import PhoneNumberField
 
 
 class CustomUserSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
     username = serializers.CharField(required=True)
     password1 = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
