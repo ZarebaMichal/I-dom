@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
-
+from django_rest_passwordreset.models import ResetPasswordToken
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
@@ -157,7 +157,7 @@ class UserLogoutAPIViewTestCase(APITestCase):
         """
         Test to verify response if user gives invalid token
         """
-        response = self.client.post(f'/api-logout/398292dxndsisk29292nc!!#$@')
+        response = self.client.post(f'/api-logout/398292dxndsisk29292nc512123')
         self.assertEqual(404, response.status_code)
 
     def test_logout_with_valid_token(self):
@@ -208,5 +208,4 @@ class UserPasswordResetAPIViewTestCase(APITestCase):
         response = self.client.post('/password-reset/', {'email': self.email})
         self.assertEqual(200, response.status_code)
         self.assertTrue('status' in json.loads(response.content))
-
-
+        self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
