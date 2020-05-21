@@ -14,7 +14,7 @@ class CreateUserAPIViewTestCase(APITestCase):
 
     def test_user_create(self):
         """
-        Test to verify if with validate data everything is ok
+        Test to verify if with validate data user can be created
         """
 
         user_data = {
@@ -28,9 +28,25 @@ class CreateUserAPIViewTestCase(APITestCase):
         response = self.client.post('/register/', user_data)
         self.assertEqual(201, response.status_code)
 
-    def test_wrong_password(self):
+    def test_user_create_without_password(self):
         """
-        Test of creating user with wrong password
+        Test to verify if without password user can be created
+        """
+
+        user_data = {
+            'username': 'testuser',
+            'email': 'test1@test.pl',
+            'password1': '',
+            'password2': '',
+            'telephone': ''
+        }
+
+        response = self.client.post('/register/', user_data)
+        self.assertEqual(400, response.status_code)
+
+    def test_user_create_wrong_password(self):
+        """
+        Test to verify if with wrong password user can be created
         """
 
         user_data = {
@@ -44,9 +60,25 @@ class CreateUserAPIViewTestCase(APITestCase):
         response = self.client.post('/register/', user_data)
         self.assertEqual(400, response.status_code)
 
-    def test_wrong_email(self):
+    def test_user_create_without_username(self):
         """
-        Test of creating user with wrong email
+        Test to verify if without username user can be created
+        """
+
+        user_data = {
+            'username': '',
+            'email': 'test1@test.pl',
+            'password1': 'test',
+            'password2': 'test',
+            'telephone': ''
+        }
+
+        response = self.client.post('/register/', user_data)
+        self.assertEqual(400, response.status_code)
+
+    def test_user_create_wrong_email(self):
+        """
+        Test to verify if with wrong email user can be created
         """
 
         user_data = {
@@ -59,6 +91,61 @@ class CreateUserAPIViewTestCase(APITestCase):
 
         response = self.client.post('/register/', user_data)
         self.assertEqual(400, response.status_code)
+
+    def test_user_create_wrong_telephone(self):
+        """
+        Test to verify if with wrong telephone user can be created
+        """
+
+        user_data = {
+            'username': 'testuser',
+            'email': 'test1@test.pl',
+            'password1': 'test',
+            'password2': 'test',
+            'telephone': '123'
+        }
+
+        response = self.client.post('/register/', user_data)
+        self.assertEqual(400, response.status_code)
+
+
+class UsersListAPIViewTestCase(APITestCase):
+
+    def setUp(self):
+        self.username = "testuser"
+        self.email = "test@test.pl"
+        self.password = "test"
+        self.telephone = '+48123456789'
+
+        self.user = CustomUser.objects.create_user(
+            self.username, self.email, self.password, self.telephone
+        )
+
+    def get_users_list(self):
+        """
+        Test of list of all users in database
+        """
+        response = self.client.get('/register/')
+        users = CustomUser.objects.all()
+
+        self.assertEqual(response, users)
+
+
+class UserDeleteAPIViewTestCase(APITestCase):
+
+    def setUp(self):
+        self.username = "testuser"
+        self.email = "test@test.pl"
+        self.password = "test"
+        self.telephone = '+48123456789'
+
+        self.user = CustomUser.objects.create_user(
+            self.username, self.email, self.password, self.telephone
+        )
+
+    def UserDelete(self):
+        response = self.client.delete('/register/1')
+        self.assertEqual(204, response.status_code)
 
 
 class UserLoginAPIViewTestCase(APITestCase):
