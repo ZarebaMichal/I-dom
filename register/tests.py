@@ -121,7 +121,7 @@ class UsersListAPIViewTestCase(APITestCase):
             self.username, self.email, self.password, self.telephone
         )
 
-    def get_users_list(self):
+    def test_get_users_list(self):
         """
         Test of list of all users in database
         """
@@ -143,7 +143,7 @@ class UserDeleteAPIViewTestCase(APITestCase):
             self.username, self.email, self.password, self.telephone
         )
 
-    def UserDelete(self):
+    def Test_User_Delete(self):
         response = self.client.delete('/register/1')
         self.assertEqual(204, response.status_code)
 
