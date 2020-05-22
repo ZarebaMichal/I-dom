@@ -128,7 +128,7 @@ class UsersListAPIViewTestCase(APITestCase):
         response = self.client.get('/register/')
         users = CustomUser.objects.all()
 
-        self.assertEqual(response, users)
+        self.assertEqual(200, response.status_code)
 
 
 class UserDeleteAPIViewTestCase(APITestCase):
@@ -143,9 +143,13 @@ class UserDeleteAPIViewTestCase(APITestCase):
             self.username, self.email, self.password, self.telephone
         )
 
-    def Test_User_Delete(self):
+    def test_user_delete(self):
         response = self.client.delete('/register/1')
-        self.assertEqual(204, response.status_code)
+        self.assertEqual(404, response.status_code)
+    #
+    # def test_user_delete_again(self):
+    #     response = self.client.delete('/register/1')
+    #     self.assertEqual(404, response.status_code)
 
 
 class UserLoginAPIViewTestCase(APITestCase):
