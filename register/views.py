@@ -25,8 +25,7 @@ def register_list(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
-@permission_classes([IsAdminUser])
+@api_view(['GET', 'PUT'])
 def register_detail(request, pk):
     """
     Retrieve, update or delete user.
@@ -47,10 +46,21 @@ def register_detail(request, pk):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE':
-        user.is_active = False
-        user.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def delete_user(request, pk):
+    """
+    Delete user by his ID. Only for admins.
+    """
+    try:
+        user = CustomUser.objects.get(pk=pk)
+    except CustomUser.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    user.is_active = False
+    user.save()
+    return Response(status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -66,5 +76,3 @@ def logout_user(request, token):
 
     token.delete()
     return Response(status=status.HTTP_200_OK)
-
-

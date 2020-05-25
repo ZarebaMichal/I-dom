@@ -334,7 +334,7 @@ class DeleteUserAPIViewTestCase(APITestCase):
         """
         Test to verify if non-admin user can delete someone's account
         """
-        response = self.client2.delete('/register/2')
+        response = self.client2.delete('/users/delete/2')
         self.assertEqual(403, response.status_code)
         self.assertTrue('detail' in json.loads(response.content))
         self.assertEqual(CustomUser.objects.all().count(), 2)
@@ -343,7 +343,7 @@ class DeleteUserAPIViewTestCase(APITestCase):
         """
         Test to verify if admin user can delete someone's account
         """
-        response = self.client.delete('/register/2')
-        self.assertEqual(204, response.status_code)
+        response = self.client.delete('/users/delete/2')
+        self.assertEqual(200, response.status_code)
         self.assertEqual(CustomUser.objects.all().count(), 2)
 
