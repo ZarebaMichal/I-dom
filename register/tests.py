@@ -347,3 +347,10 @@ class DeleteUserAPIViewTestCase(APITestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(CustomUser.objects.all().count(), 2)
 
+    def test_delete_user_which_doesnt_exist(self):
+        """
+        Test to verify response if user doesn't exists
+        """
+        response = self.client.delete('/users/delete/3')
+        self.assertEqual(404, response.status_code)
+
