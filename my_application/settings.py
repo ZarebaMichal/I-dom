@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'phonenumber_field',
     'django_rest_passwordreset',
+    'sensors',
     ]
 
 REST_FRAMEWORK = {
@@ -126,7 +127,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Warsaw'
 
 USE_I18N = True
 
