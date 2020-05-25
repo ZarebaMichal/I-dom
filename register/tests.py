@@ -6,6 +6,8 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
 from django_rest_passwordreset.models import ResetPasswordToken
+from django.test import Client
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
@@ -131,21 +133,21 @@ class UsersListAPIViewTestCase(APITestCase):
         self.assertEqual(200, response.status_code)
 
 
-class UserDeleteAPIViewTestCase(APITestCase):
-
-    def setUp(self):
-        self.username = "testuser"
-        self.email = "test@test.pl"
-        self.password = "test"
-        self.telephone = '+48123456789'
-
-        self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
-        )
-
-    def test_user_delete(self):
-        response = self.client.delete('/register/1')
-        self.assertEqual(404, response.status_code)
+# class UserDeleteAPIViewTestCase(APITestCase):
+#
+#     def setUp(self):
+#         self.username = "testuser"
+#         self.email = "test@test.pl"
+#         self.password = "test"
+#         self.telephone = '+48123456789'
+#
+#         self.user = CustomUser.objects.create_user(
+#             self.username, self.email, self.password, self.telephone
+#         )
+#
+#     def test_user_delete(self):
+#         response = self.client.delete('/register/1')
+#         self.assertEqual(404, response.status_code)
     #
     # def test_user_delete_again(self):
     #     response = self.client.delete('/register/1')
@@ -241,7 +243,7 @@ class UserLogoutAPIViewTestCase(APITestCase):
         """
         Test to verify response if user doesn't give his token
         """
-        response = self.client.post('/api-logout/ ',)
+        response = self.client.post('/api-logout/ ', )
         self.assertEqual(404, response.status_code)
 
     def test_logout_with_invalid_token(self):
@@ -300,3 +302,48 @@ class UserPasswordResetAPIViewTestCase(APITestCase):
         self.assertEqual(200, response.status_code)
         self.assertTrue('status' in json.loads(response.content))
         self.assertEqual(ResetPasswordToken.objects.all().count(), 1)
+
+
+class DeleteUserAPIViewTestCase(APITestCase):
+    def setUp(self):
+        self.username = "CheekiBreeki"
+        self.email = "chernobyl@gmail.com"
+        self.password = "ivdamke"
+        self.telephone = '+48999111000'
+
+        self.user = CustomUser.objects.create_superuser(
+            self.username, self.email, self.password, self.telephone
+        )
+
+        self.token, self.created = Token.objects.get_or_create(user=self.user)
+        self.client = Client(HTTP_AUTHORIZATION='Token ' + self.token.key)
+
+        self.username2 = "test2"
+        self.email2 = "test@gmail.com"
+        self.password2 = "test"
+        self.telephone2 = '+48666666666'
+
+        self.user2 = CustomUser.objects.create_user(
+            self.username2, self.email2, self.password2, self.telephone2
+        )
+
+        self.token2, self.created2 = Token.objects.get_or_create(user=self.user2)
+        self.client2 = Client(HTTP_AUTHORIZATION='Token ' + self.token2.key)
+
+    def test_delete_user_by_no_admin(self):
+        """
+        Test to verify if non-admin user can delete someone's account
+        """
+        response = self.client2.delete('/register/2')
+        self.assertEqual(403, response.status_code)
+        self.assertTrue('detail' in json.loads(response.content))
+        self.assertEqual(CustomUser.objects.all().count(), 2)
+
+    def test_delete_user_by_admin(self):
+        """
+        Test to verify if admin user can delete someone's account
+        """
+        response = self.client.delete('/register/2')
+        self.assertEqual(204, response.status_code)
+        self.assertEqual(CustomUser.objects.all().count(), 2)
+
