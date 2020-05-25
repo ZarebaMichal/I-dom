@@ -1,9 +1,10 @@
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from register.models import CustomUser
 from register.serializer import CustomUserSerializer
 from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAdminUser
 
 
 @api_view(['GET', 'POST'])
@@ -25,6 +26,7 @@ def register_list(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAdminUser])
 def register_detail(request, pk):
     """
     Retrieve, update or delete user.
