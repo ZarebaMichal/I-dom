@@ -34,6 +34,19 @@ class CustomUserSerializer(serializers.Serializer):
             return user
 
     def update(self, instance, validated_data):
+        pass
+
+
+class UpdateCustomUserSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    telephone = PhoneNumberField(required=True, trim_whitespace=True, allow_blank=True)
+    sms_notifications = serializers.BooleanField(default=True)
+    app_notifications = serializers.BooleanField(default=True)
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
         """
         Update and return an existing user instance, given the validated data.
 
