@@ -145,14 +145,29 @@ class UserUpdateAPIViewTestCase(APITestCase):
 
         self.valid_payload = {
             'email': 'test1@test.pl',
-            'telephone': '+48123456789',
+            'telephone': '+48123456780',
+            'sms_notifications': False,
+            'app_notifications': False
+        }
+
+        self.non_valid_payload = {
+            'email': '',
+            'telephone': '+4848123456789',
             'sms_notifications': True,
             'app_notifications': True
         }
 
-    def test_email_update(self):
+    def test_update(self):
+        """
+        Test to verify if with validated data user can be updated
+        :return:
+        """
         response = self.client.put(f'/register/{self.user.pk}', self.valid_payload)
         self.assertEqual(200, response.status_code)
+
+    def test_failed_update(self):
+        response = self.client.put(f'/register/{self.user.pk}', self.non_valid_payload)
+        self.assertEqual(400, response.status_code)
 
 
 class UserLoginAPIViewTestCase(APITestCase):
