@@ -128,30 +128,31 @@ class UsersListAPIViewTestCase(APITestCase):
         Test of list of all users in database
         """
         response = self.client.get('/register/')
-        users = CustomUser.objects.all()
-
         self.assertEqual(200, response.status_code)
 
 
-# class UserDeleteAPIViewTestCase(APITestCase):
-#
-#     def setUp(self):
-#         self.username = "testuser"
-#         self.email = "test@test.pl"
-#         self.password = "test"
-#         self.telephone = '+48123456789'
-#
-#         self.user = CustomUser.objects.create_user(
-#             self.username, self.email, self.password, self.telephone
-#         )
-#
-#     def test_user_delete(self):
-#         response = self.client.delete('/register/1')
-#         self.assertEqual(404, response.status_code)
-    #
-    # def test_user_delete_again(self):
-    #     response = self.client.delete('/register/1')
-    #     self.assertEqual(404, response.status_code)
+class UserUpdateAPIViewTestCase(APITestCase):
+
+    def setUp(self):
+        self.username = "testuser"
+        self.email = "test@test.pl"
+        self.password = "test"
+        self.telephone = '+48123456789'
+
+        self.user = CustomUser.objects.create_user(
+            self.username, self.email, self.password, self.telephone
+        )
+
+        self.valid_payload = {
+            'email': 'test1@test.pl',
+            'telephone': '+48123456789',
+            'sms_notifications': True,
+            'app_notifications': True
+        }
+
+    def test_email_update(self):
+        response = self.client.put(f'/register/{self.user.pk}', self.valid_payload)
+        self.assertEqual(200, response.status_code)
 
 
 class UserLoginAPIViewTestCase(APITestCase):
