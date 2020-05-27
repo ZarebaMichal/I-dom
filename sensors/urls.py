@@ -5,5 +5,6 @@ from . import views
 
 urlpatterns = [
     # API paths
-    path('sensors/add/', views.add_sensor)
+    path('sensors/', views.all_sensors),
+    path('sensors/<int:pk>', views.sensor_detail)
 ]
