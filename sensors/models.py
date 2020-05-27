@@ -12,7 +12,7 @@ class Sensors(models.Model):
     name = models.CharField(max_length=30, unique=True)
     category = models.CharField(max_length=15, choices=CATEGORIES)
     battery_level = models.IntegerField(blank=True, null=True)
-    notifications = models.BooleanField()
+    notifications = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
