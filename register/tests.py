@@ -24,7 +24,7 @@ class CreateUserAPIViewTestCase(APITestCase):
             'email': 'test1@test.pl',
             'password1': 'test',
             'password2': 'test',
-            'telephone': ''
+            'telephone': '+48606707808'
         }
 
         response = self.client.post('/register/', user_data)
