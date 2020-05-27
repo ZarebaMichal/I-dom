@@ -110,6 +110,32 @@ class CreateUserAPIViewTestCase(APITestCase):
         response = self.client.post('/register/', user_data)
         self.assertEqual(400, response.status_code)
 
+    def test_user_create_the_same_username(self):
+        """
+        Test to verify if can be created users with the same names
+        """
+
+        user_data = {
+            'username': 'testuser',
+            'email': 'test1@test.pl',
+            'password1': 'test',
+            'password2': 'test',
+            'telephone': ''
+        }
+
+        self.client.post('/register/', user_data)
+
+        user_data_2 = {
+            'username': 'testuser',
+            'email': 'test@test.pl',
+            'password1': 'test',
+            'password2': 'test',
+            'telephone': ''
+        }
+
+        response = self.client.post('/register/', user_data_2)
+        self.assertEqual(409, response.status_code)
+
 
 class UsersListAPIViewTestCase(APITestCase):
 
