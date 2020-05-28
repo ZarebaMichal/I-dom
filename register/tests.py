@@ -24,10 +24,10 @@ class CreateUserAPIViewTestCase(APITestCase):
             'email': 'test1@test.pl',
             'password1': 'test',
             'password2': 'test',
-            'telephone': '+48606707808'
+            'telephone': '+48123456789'
         }
 
-        response = self.client.post('/register/', user_data)
+        response = self.client.post('/users/add', user_data)
         self.assertEqual(201, response.status_code)
 
     def test_user_create_without_password(self):
@@ -43,7 +43,7 @@ class CreateUserAPIViewTestCase(APITestCase):
             'telephone': ''
         }
 
-        response = self.client.post('/register/', user_data)
+        response = self.client.post('/users/add', user_data)
         self.assertEqual(400, response.status_code)
 
     def test_user_create_wrong_password(self):
@@ -59,7 +59,7 @@ class CreateUserAPIViewTestCase(APITestCase):
             'telephone': ''
         }
 
-        response = self.client.post('/register/', user_data)
+        response = self.client.post('/users/add', user_data)
         self.assertEqual(400, response.status_code)
 
     def test_user_create_without_username(self):
@@ -75,7 +75,7 @@ class CreateUserAPIViewTestCase(APITestCase):
             'telephone': ''
         }
 
-        response = self.client.post('/register/', user_data)
+        response = self.client.post('/users/add', user_data)
         self.assertEqual(400, response.status_code)
 
     def test_user_create_wrong_email(self):
@@ -91,7 +91,7 @@ class CreateUserAPIViewTestCase(APITestCase):
             'telephone': ''
         }
 
-        response = self.client.post('/register/', user_data)
+        response = self.client.post('/users/add', user_data)
         self.assertEqual(400, response.status_code)
 
     def test_user_create_wrong_telephone(self):
@@ -107,7 +107,7 @@ class CreateUserAPIViewTestCase(APITestCase):
             'telephone': '123'
         }
 
-        response = self.client.post('/register/', user_data)
+        response = self.client.post('/users/add', user_data)
         self.assertEqual(400, response.status_code)
 
     def test_user_create_the_same_username(self):
@@ -123,7 +123,7 @@ class CreateUserAPIViewTestCase(APITestCase):
             'telephone': ''
         }
 
-        self.client.post('/register/', user_data)
+        self.client.post('/users/add', user_data)
 
         user_data_2 = {
             'username': 'testuser',
@@ -133,7 +133,7 @@ class CreateUserAPIViewTestCase(APITestCase):
             'telephone': ''
         }
 
-        response = self.client.post('/register/', user_data_2)
+        response = self.client.post('/users/add', user_data_2)
         self.assertEqual(409, response.status_code)
 
 
@@ -153,7 +153,14 @@ class UsersListAPIViewTestCase(APITestCase):
         """
         Test of list of all users in database
         """
-        response = self.client.get('/register/')
+        response = self.client.get('/users/list')
+        self.assertEqual(200, response.status_code)
+
+    def test_get_one_user(self):
+        """
+        Test to check if user can be called by username
+        """
+        response = self.client.get(f'/users/detail/{self.user.username}')
         self.assertEqual(200, response.status_code)
 
 
@@ -188,11 +195,11 @@ class UserUpdateAPIViewTestCase(APITestCase):
         Test to verify if with validated data user can be updated
         :return:
         """
-        response = self.client.put(f'/register/{self.user.pk}', self.valid_payload)
+        response = self.client.put(f'/users/update/{self.user.pk}', self.valid_payload)
         self.assertEqual(200, response.status_code)
 
     def test_failed_update(self):
-        response = self.client.put(f'/register/{self.user.pk}', self.non_valid_payload)
+        response = self.client.put(f'/users/update/{self.user.pk}', self.non_valid_payload)
         self.assertEqual(400, response.status_code)
 
 
@@ -376,7 +383,7 @@ class DeleteUserAPIViewTestCase(APITestCase):
         """
         Test to verify if non-admin user can delete someone's account
         """
-        response = self.client2.delete('/users/delete/2')
+        response = self.client2.delete(f'/users/delete/{self.user2.id}')
         self.assertEqual(403, response.status_code)
         self.assertTrue('detail' in json.loads(response.content))
         self.assertEqual(CustomUser.objects.all().count(), 2)
@@ -385,7 +392,7 @@ class DeleteUserAPIViewTestCase(APITestCase):
         """
         Test to verify if admin user can delete someone's account
         """
-        response = self.client.delete('/users/delete/2')
+        response = self.client.delete(f'/users/delete/{self.user2.id}')
         self.assertEqual(200, response.status_code)
         self.assertEqual(CustomUser.objects.all().count(), 2)
 
@@ -393,6 +400,6 @@ class DeleteUserAPIViewTestCase(APITestCase):
         """
         Test to verify response if user doesn't exists
         """
-        response = self.client.delete('/users/delete/3')
+        response = self.client.delete('/users/delete/35')
         self.assertEqual(404, response.status_code)
 

@@ -1,10 +1,12 @@
 from django.urls import path, include, re_path
-from rest_framework.urlpatterns import format_suffix_patterns
 from . import views
 
 
 urlpatterns = [
     # API paths
-    path('sensors/', views.all_sensors),
-    path('sensors/<int:pk>', views.sensor_detail)
+    path('sensors/list', views.list_of_sensors),
+    path('sensors/add', views.add_sensors),
+    path('sensors/detail/<int:pk>', views.sensor_detail),
+    path('sensors/update/<int:pk>', views.update_sensor),
+    path('sensors/delete/<int:pk>', views.delete_sensor)
 ]

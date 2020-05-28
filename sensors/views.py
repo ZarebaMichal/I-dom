@@ -8,41 +8,47 @@ from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ObjectDoesNotExist
 
 
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def all_sensors(request, format=None):
+def list_of_sensors(request, format=None):
     """
-    Add new sensor or get list of all sensors, only for authenticated users
-    :returns: When request method 'POST' instance of created sensor and 201 HTTP response,
+    Get list of all sensors, only for authenticated users
+    :param request: GET
+    :return: list of all sensors if ok http 200 response
+    """
+    sensors = Sensors.objects.all()
+    serializer = SensorsSerializer(sensors, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_sensors(request, format=None):
+    """
+    Add new sensor, only for authenticated users
+    :returns: instance of created sensor and 201 HTTP response,
              if failed, 400 HTTP response, if sensor with given
              name already exists, 409 HTTP response.
-             Or list of sensors when request method 'GET'
     """
-    if request.method == 'GET':
-        sensors = Sensors.objects.all()
-        serializer = SensorsSerializer(sensors, many=True)
-        return Response(serializer.data)
-
-    elif request.method == 'POST':
-        sensor_name = request.data['name']
-        try:
-            sensor = Sensors.objects.get(name=sensor_name)
-        except ObjectDoesNotExist:
-            serializer = SensorsSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    sensor_name = request.data['name']
+    try:
+        sensor = Sensors.objects.get(name=sensor_name)
+    except ObjectDoesNotExist:
+        serializer = SensorsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response(status=status.HTTP_409_CONFLICT)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response(status=status.HTTP_409_CONFLICT)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def sensor_detail(request, pk, format=None):
     """
-    Retrieve, update or delete sensor.
+    Retrieve data of sensor
     :return: If sensor doesn't exist return 404,
             if given invalid data, return 400,
             else if succeeded return 200
@@ -52,18 +58,49 @@ def sensor_detail(request, pk, format=None):
     except Sensors.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == 'GET':
-        serializer = SensorsSerializer(sensor)
-        return Response(serializer.data)
+    serializer = SensorsSerializer(sensor)
+    return Response(serializer.data)
 
-    elif request.method == 'PUT':
-        serializer = SensorsSerializer(sensor, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE':
-        sensor.is_active = False
-        sensor.save()
-        return Response(status=status.HTTP_200_OK)
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_sensor(request, pk, format=None):
+    """
+    Update data of sensor
+    :param request: PUT
+    :param pk: id of sensor
+    :return: If sensor doesn't exist return 404,
+            if given invalid data, return 400,
+            else if succeeded return 200
+    """
+    try:
+        sensor = Sensors.objects.get(pk=pk)
+    except Sensors.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    serializer = SensorsSerializer(sensor, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_sensor(request, pk, format=None):
+    """
+        Delete sensor
+        :param request: DELETE
+        :param pk: id of sensor
+        :return: If sensor doesn't exist return 404,
+                if given invalid data, return 400,
+                else if succeeded return 200
+        """
+    try:
+        sensor = Sensors.objects.get(pk=pk)
+    except Sensors.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    sensor.is_active = False
+    sensor.save()
+    return Response(status=status.HTTP_200_OK)
