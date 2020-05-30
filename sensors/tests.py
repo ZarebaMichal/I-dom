@@ -148,10 +148,11 @@ class UpdateSensorAPIViewTestCase(APITestCase):
         self.category = 'temperature'
 
         self.sensor = Sensors.objects.create(name=self.name, category=self.category)
+        pk = int(self.sensor.pk)
 
         self.validated_payload = {
             'name': 'salon',
-            'category': 'humidity'
+            'category': 'temperature'
         }
 
         self.non_validated_payload = {
