@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from sensors.models import Sensors
+from sensors.models import Sensors, SensorsData
+from django.utils import timezone
 
 
 class SensorsSerializer(serializers.Serializer):
@@ -39,3 +40,23 @@ class SensorsSerializer(serializers.Serializer):
         instance.save()
 
         return instance
+
+
+class SensorsDataSerializer(serializers.Serializer):
+
+    sensor_id = serializers.ReadOnlyField(source=Sensors.id)
+    delivery_time = serializers.DateTimeField(default=timezone.now)
+    sensor_data = serializers.CharField(max_length=20)
+
+    def create(self, validated_data):
+        """
+        Create instance of data collected by sensor.
+        :param validated_data:
+        :return:
+        """
+        sensor_data = SensorsData.oobjects.create(
+                                                  sensor_data=validated_data.get('sensor_data')
+                                                  )
+
+    def update(self, instance, validated_data):
+        pass

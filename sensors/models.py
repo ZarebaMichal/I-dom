@@ -8,7 +8,7 @@ class Sensors(models.Model):
         ('temperature', 'temperature'),
         ('humidity', 'humidity'),
     ]
-
+    id = models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
     name = models.CharField(max_length=30, unique=True)
     category = models.CharField(max_length=15, choices=CATEGORIES)
     battery_level = models.IntegerField(blank=True, null=True)
