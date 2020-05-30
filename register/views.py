@@ -34,10 +34,17 @@ def register_user(request, format=None):
     # Striping spaces from telephone number because it's done in serializer, not before
     if telephone:
         telephone.replace(' ', '')
+        user1 = CustomUser.objects.filter(username=username)
+        user2 = CustomUser.objects.filter(email=email)
+        user3 = CustomUser.objects.filter(telephone=telephone)
+    else:
+        user1 = CustomUser.objects.filter(username=username)
+        user2 = CustomUser.objects.filter(email=email)
+        user3 = None
 
-    user1 = CustomUser.objects.filter(username=username)
-    user2 = CustomUser.objects.filter(email=email)
-    user3 = CustomUser.objects.filter(telephone=telephone)
+
+    # user1 = CustomUser.objects.filter(username=username)
+    # user2 = CustomUser.objects.filter(email=email)
 
     if user1 or user2 or user3:
         return Response(status=status.HTTP_409_CONFLICT)
@@ -77,11 +84,25 @@ def update_user(request, pk, format=None):
     except CustomUser.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    serializer = UpdateCustomUserSerializer(user, data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    email = request.data['email']
+    telephone = request.data['telephone']
+
+    if telephone:
+        telephone.replace(' ', '')
+        user1 = CustomUser.objects.filter(email=email)
+        user2 = CustomUser.objects.filter(telephone=telephone)
+    else:
+        user1 = CustomUser.objects.filter(email=email)
+        user2 = None
+
+    if user1 or user2:
+        return Response(status=status.HTTP_409_CONFLICT)
+    else:
+        serializer = UpdateCustomUserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['DELETE'])
