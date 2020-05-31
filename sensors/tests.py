@@ -5,6 +5,7 @@ from sensors.models import Sensors
 from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
 from django.test import Client
+from rest_framework.test import APIClient
 
 
 class AddSensorAPIViewTestCase(APITestCase):
@@ -142,7 +143,7 @@ class UpdateSensorAPIViewTestCase(APITestCase):
         )
 
         self.token = Token.objects.create(user=self.user)
-        self.client = Client(HTTP_AUTHORIZATION='Token ' + self.token.key)
+        self.client = APIClient(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
         self.name = 'piwnica'
         self.category = 'temperature'
