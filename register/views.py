@@ -5,6 +5,7 @@ from register.models import CustomUser
 from register.serializer import CustomUserSerializer, UpdateCustomUserSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
+import json
 
 
 @api_view(['GET'])
@@ -27,9 +28,32 @@ def register_user(request, format=None):
     """
     # Perhaps there's a prettier way to check if user exists,
     # if so, please update this method.
-    username = request.data['username']
-    email = request.data['email']
-    telephone = request.data['telephone']
+    # Check if username was given
+    try:
+        username = request.data['username']
+    except KeyError:
+        data = {
+            'detail': 'You need to provide username to register'
+        }
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+    # Check if email was given
+    try:
+        email = request.data['email']
+    except KeyError:
+        data = {
+            'detail': 'You need to provide email to register'
+        }
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+    # Check if telephone was given
+    try:
+        telephone = request.data['telephone']
+    except KeyError:
+        data = {
+            'detail': 'You need to provide telephone '
+        }
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
     # Striping spaces from telephone number because it's done in serializer, not before
     if telephone:
@@ -42,12 +66,24 @@ def register_user(request, format=None):
         user2 = CustomUser.objects.filter(email=email)
         user3 = None
 
-
-    # user1 = CustomUser.objects.filter(username=username)
-    # user2 = CustomUser.objects.filter(email=email)
-
-    if user1 or user2 or user3:
-        return Response(status=status.HTTP_409_CONFLICT)
+    # Check if user with given username already exists
+    if user1:
+        data = {
+            'detail': 'User with given username already exists'
+        }
+        return Response(data, status=status.HTTP_409_CONFLICT)
+    # Check if user with given email already exists
+    elif user2:
+        data = {
+            'detail': 'User with given email already exists'
+        }
+        return Response(data, status=status.HTTP_409_CONFLICT)
+    # Check if user with given telephone already exists
+    elif user3:
+        data = {
+            'detail': 'User with given telephone number already exists'
+        }
+        return Response(data, status=status.HTTP_409_CONFLICT)
     else:
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
@@ -84,9 +120,25 @@ def update_user(request, pk, format=None):
     except CustomUser.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    email = request.data['email']
-    telephone = request.data['telephone']
+    # Check if email was given
+    try:
+        email = request.data['email']
+    except KeyError:
+        data = {
+            'detail': 'You need to provide email'
+        }
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
+    # Check if telephone was given
+    try:
+        telephone = request.data['telephone']
+    except KeyError:
+        data = {
+            'detail': 'You need to provide telephone'
+        }
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+    # Striping from spaces because it's done in serializer
     if telephone:
         telephone.replace(' ', '')
         user1 = CustomUser.objects.filter(email=email)
@@ -95,8 +147,18 @@ def update_user(request, pk, format=None):
         user1 = CustomUser.objects.filter(email=email)
         user2 = None
 
-    if user1 or user2:
-        return Response(status=status.HTTP_409_CONFLICT)
+    # Check if user with given email already exists
+    if user1:
+        data = {
+            'detail': 'User with given email already exists'
+        }
+        return Response(data, status=status.HTTP_409_CONFLICT)
+    # Check if user with given telephone number already exists
+    elif user2:
+        data = {
+            'detail': 'User with given telephone number already exists'
+        }
+        return Response(data, status=status.HTTP_409_CONFLICT)
     else:
         serializer = UpdateCustomUserSerializer(user, data=request.data)
         if serializer.is_valid():
