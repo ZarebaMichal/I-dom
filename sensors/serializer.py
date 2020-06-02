@@ -55,7 +55,7 @@ class SensorsSerializer(serializers.Serializer):
 
 class SensorsDataSerializer(serializers.Serializer):
 
-    sensor_id = serializers.ReadOnlyField(source=Sensors.id)
+    sensor_id = serializers.SlugRelatedField(read_only=False, slug_field='id', queryset=Sensors.objects.all())
     delivery_time = serializers.DateTimeField(default=timezone.now)
     sensor_data = serializers.CharField(max_length=20)
 
@@ -65,9 +65,8 @@ class SensorsDataSerializer(serializers.Serializer):
         :param validated_data:
         :return:
         """
-        sensor_data = SensorsData.oobjects.create(
-                                                  sensor_data=validated_data.get('sensor_data')
-                                                  )
+        sensor_data = SensorsData.objects.create(sensor_id=validated_data.get('sensor_id'),
+                                                 sensor_data=validated_data.get('sensor_data'))
         return sensor_data
 
     def update(self, instance, validated_data):

@@ -8,5 +8,6 @@ urlpatterns = [
     path('sensors/add', views.add_sensors),
     path('sensors/detail/<int:pk>', views.sensor_detail),
     path('sensors/update/<int:pk>', views.update_sensor),
-    path('sensors/delete/<int:pk>', views.delete_sensor)
+    path('sensors/delete/<int:pk>', views.delete_sensor),
+    path('sensors_data/add', views.add_sensor_data)
 ]
