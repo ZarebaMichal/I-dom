@@ -46,7 +46,6 @@ def sensor_detail(request, pk, format=None):
     """
     Retrieve data of sensor
     :return: If sensor doesn't exist return 404,
-            if given invalid data, return 400,
             else if succeeded return 200
     """
     try:
