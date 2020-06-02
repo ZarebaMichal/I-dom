@@ -403,3 +403,5 @@ class DeleteUserAPIViewTestCase(APITestCase):
         response = self.client.delete('/users/delete/35')
         self.assertEqual(404, response.status_code)
 
+        ### test
+
