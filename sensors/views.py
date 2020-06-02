@@ -26,22 +26,18 @@ def list_of_sensors(request, format=None):
 def add_sensors(request, format=None):
     """
     Add new sensor, only for authenticated users
+    :param request: POST: name, category of the sensor
     :returns: instance of created sensor and 201 HTTP response,
              if failed, 400 HTTP response, if sensor with given
-             name already exists, 409 HTTP response.
+             name already exists, 400 HTTP response and expected error
     """
-    sensor_name = request.data['name']
-    try:
-        sensor = Sensors.objects.get(name=sensor_name)
-    except ObjectDoesNotExist:
-        serializer = SensorsSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    serializer = SensorsSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
-        return Response(status=status.HTTP_409_CONFLICT)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
