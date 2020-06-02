@@ -45,14 +45,14 @@ class CustomUserSerializer(serializers.Serializer):
                 raise serializers.ValidationError('Telephone number already exists')
         return value
 
-    @staticmethod
-    def validate_password(data):
-        """
-        Check if user provided twice correct password
-        """
-        if data['password1'] != data['password2']:
-            raise serializers.ValidationError('Those passwords do not match')
-        return data
+    # @staticmethod
+    # def validate_password(validated_data):
+    #     """
+    #     Check if user provided twice correct password
+    #     """
+    #     if validated_data['password1'] != validated_data['password2']:
+    #         raise serializers.ValidationError('Those passwords do not match')
+    #     return validated_data
 
     def create(self, validated_data):
         """
@@ -61,13 +61,16 @@ class CustomUserSerializer(serializers.Serializer):
         :param validated_data:
         :return: new user instance
         """
-        user = CustomUser.objects.create(username=validated_data.get('username'),
-                                         email=validated_data.get('email'),
-                                         password=validated_data.get('password1'),
-                                         telephone=validated_data.get('telephone'))
-        user.set_password(validated_data.get('password1'))
-        user.save()
-        return user
+        if validated_data['password1'] != validated_data['password2']:
+            raise serializers.ValidationError('Those passwords do not match')
+        else:
+            user = CustomUser.objects.create(username=validated_data.get('username'),
+                                             email=validated_data.get('email'),
+                                             password=validated_data.get('password1'),
+                                             telephone=validated_data.get('telephone'))
+            user.set_password(validated_data.get('password1'))
+            user.save()
+            return user
 
     def update(self, instance, validated_data):
         pass
