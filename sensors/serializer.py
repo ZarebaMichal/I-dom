@@ -16,6 +16,17 @@ class SensorsSerializer(serializers.Serializer):
     notifications = serializers.BooleanField(default=True)
     is_active = serializers.BooleanField(default=True)
 
+    @staticmethod
+    def validate_name(value):
+        """
+        Check if sensor with provided name exists in database.
+        :param value:
+        :return:
+        """
+        if Sensors.objects.filter(name=value).exists():
+            raise serializers.ValidationError('Sensor with provided name already exists')
+        return value
+
     def create(self, validated_data):
         """
         Create and return new sensor instance, given the validated data
@@ -57,6 +68,7 @@ class SensorsDataSerializer(serializers.Serializer):
         sensor_data = SensorsData.oobjects.create(
                                                   sensor_data=validated_data.get('sensor_data')
                                                   )
+        return sensor_data
 
     def update(self, instance, validated_data):
         pass
