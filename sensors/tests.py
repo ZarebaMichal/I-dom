@@ -100,11 +100,11 @@ class GetListOfSensorsAPIViewTestCase(APITestCase):
         self.assertEqual(Sensors.objects.all().count(), 1)
 
     def test_get_single_sensor(self):
-        response = self.client.get(f'/sensors/list/{self.sensor.id}')
+        response = self.client.get(f'/sensors/detail/{self.sensor.id}')
         self.assertEqual(200, response.status_code)
 
     def test_single_not_existing_detail_of_sensor(self):
-        response = self.client.get(f'/sensors/list/{self.id}')
+        response = self.client.get(f'/sensors/detail/{self.id}')
         self.assertEqual(404, response.status_code)
 
 
