@@ -65,9 +65,9 @@ class SensorsDataSerializer(serializers.Serializer):
         :param validated_data:
         :return:
         """
-        sensor_data = SensorsData.objects.create(sensor_id=validated_data.get('sensor_id'),
+        data = SensorsData.objects.create(sensor_id=validated_data.get('sensor_id'),
                                                  sensor_data=validated_data.get('sensor_data'))
-        return sensor_data
+        return data
 
     def update(self, instance, validated_data):
         pass
