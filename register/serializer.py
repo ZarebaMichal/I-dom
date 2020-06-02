@@ -25,6 +25,15 @@ class CustomUserSerializer(serializers.Serializer):
         return value
 
     @staticmethod
+    def validate_username(value):
+        """
+        Check if user with given username already exists in db
+        """
+        if CustomUser.objects.filter(username=value).exists():
+            raise serializers.ValidationError('Username already exists')
+        return value
+
+    @staticmethod
     def validate_telephone(value):
         """
         Check if user with given phone number already exists in db
