@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -5,6 +7,7 @@ from rest_framework.response import Response
 from sensors.models import Sensors
 from sensors.serializer import SensorsSerializer, SensorsDataSerializer
 from rest_framework.permissions import IsAuthenticated
+import requests
 from django.core.exceptions import ObjectDoesNotExist
 
 
@@ -109,3 +112,35 @@ def add_sensor_data(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def change_frequency_data(request, pk):
+    try:
+        time_seconds = int(request.data['frequency'])
+    except KeyError:
+        data = {
+            'detail': 'You need to provide frequency time'
+        }
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+    sensor_id = pk
+
+    data_for_sensor = {
+        'id': sensor_id,
+        'frequency': time_seconds * 1000
+    }
+
+    try:
+        response = requests.post('http://192.168.1.7', data=data_for_sensor)
+        response.raise_for_status()
+
+    except requests.exceptions.ConnectionError:
+        return Response(data_for_sensor, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+    except requests.exceptions.Timeout:
+        return Response(status=status.HTTP_408_REQUEST_TIMEOUT)
+
+    return Response(status=status.HTTP_200_OK)
+
+
