@@ -93,7 +93,7 @@ class SensorsDataSerializer(serializers.Serializer):
         :return:
         """
         data = SensorsData.objects.create(sensor_id=validated_data.get('sensor_id'),
-                                                 sensor_data=validated_data.get('sensor_data'))
+                                          sensor_data=validated_data.get('sensor_data'))
         return data
 
     def update(self, instance, validated_data):

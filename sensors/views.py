@@ -1,5 +1,3 @@
-import json
-
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -111,7 +109,7 @@ def add_sensor_data(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
