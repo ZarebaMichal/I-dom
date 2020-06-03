@@ -23,7 +23,7 @@ def list_of_sensors(request, format=None):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+#@permission_classes([IsAuthenticated])
 def add_sensors(request, format=None):
     """
     Add new sensor, only for authenticated users
@@ -116,12 +116,24 @@ def list_of_sensors_data(request, format=None):
 
 @api_view(['POST'])
 def add_sensor_data(request):
-    serializer = SensorsDataSerializer(data=request.data)
+    try:
+        sensor = Sensors.objects.get(name=request.data['name'])
+    except ObjectDoesNotExist:
+        data = {
+            'detail': 'Sensor does not exist'
+        }
+        return Response(data, status=status.HTTP_404_NOT_FOUND)
+
+    data = {
+        'sensor_id': sensor.id,
+        'sensor_data': request.data['sensor_data']
+    }
+    serializer = SensorsDataSerializer(data=data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
-        return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -152,5 +164,3 @@ def change_frequency_data(request, pk):
         return Response(status=status.HTTP_408_REQUEST_TIMEOUT)
 
     return Response(status=status.HTTP_200_OK)
-
-

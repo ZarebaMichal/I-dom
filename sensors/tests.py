@@ -213,11 +213,62 @@ class ListSensorsDataAPIViewTestCase(APITestCase):
         self.name = 'piwnica'
         self.category = 'temperature'
 
+        self.sensor_data = '324324'
+
         self.sensor = Sensors.objects.create(name=self.name, category=self.category)
 
-        SensorsData.object.create(sensor_id=1, sensor_data=37)
+        self.data = SensorsData.objects.create(sensor_id=Sensors.objects.get(name=self.name, category=self.category),
+                                               sensor_data=self.sensor_data)
 
     def test_list_all_data_from_sensor_data(self):
         response = self.client.get('/sensors_data/list')
         self.assertEqual(200, response.status_code)
-        self.assertEqual(SensorsData.objects.all(), 1)
+        self.assertEqual(1, SensorsData.objects.all().count())
+
+
+class AddSensorDataAPIViewTestCase(APITestCase):
+    """
+    Tests to verify if adding new data to database works properly
+    """
+
+    def setUp(self):
+        self.username = "CheekiBreeki"
+        self.email = "chernobyl@gmail.com"
+        self.password = "ivdamke"
+        self.telephone = '+48999111000'
+
+        self.user = CustomUser.objects.create_user(
+            self.username, self.email, self.password, self.telephone
+        )
+
+        self.token = Token.objects.create(user=self.user)
+        self.client = APIClient(HTTP_AUTHORIZATION='Token ' + self.token.key)
+
+        self.name = 'piwnica'
+        self.category = 'temperature'
+
+        self.sensor = Sensors.objects.create(name=self.name, category=self.category)
+
+    def test_add_new_data(self):
+        data = {
+            'name': self.sensor.name,
+            'sensor_data': '3789'
+        }
+        response = self.client.post('/sensors_data/add', data)
+        self.assertEqual(201, response.status_code)
+
+    def test_add_new_data_without_name(self):
+        data = {
+            'name': '',
+            'sensor_data': '3789'
+        }
+        response = self.client.post('/sensors_data/add', data)
+        self.assertEqual(404, response.status_code)
+
+    def test_add_new_data_with_non_validated_data(self):
+        data = {
+            'name': self.sensor.name,
+            'sensor_data': 123456789012345678901234567890
+        }
+        response = self.client.post('/sensors_data/add', data)
+        self.assertEqual(400, response.status_code)
