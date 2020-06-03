@@ -1,7 +1,7 @@
 import json
 
 from register.models import CustomUser
-from sensors.models import Sensors
+from sensors.models import Sensors, SensorsData
 from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
 from django.test import Client
@@ -190,3 +190,34 @@ class UpdateSensorAPIViewTestCase(APITestCase):
     def test_fail_no_sensor_update(self):
         response = self.client.put(f'/sensors/update/{self.id}', self.validated_payload)
         self.assertEqual(404, response.status_code)
+
+
+class ListSensorsDataAPIViewTestCase(APITestCase):
+    """
+    Tests for updating new sensor
+    """
+
+    def setUp(self):
+        self.username = "CheekiBreeki"
+        self.email = "chernobyl@gmail.com"
+        self.password = "ivdamke"
+        self.telephone = '+48999111000'
+
+        self.user = CustomUser.objects.create_user(
+            self.username, self.email, self.password, self.telephone
+        )
+
+        self.token = Token.objects.create(user=self.user)
+        self.client = APIClient(HTTP_AUTHORIZATION='Token ' + self.token.key)
+
+        self.name = 'piwnica'
+        self.category = 'temperature'
+
+        self.sensor = Sensors.objects.create(name=self.name, category=self.category)
+
+        SensorsData.object.create(sensor_id=1, sensor_data=37)
+
+    def test_list_all_data_from_sensor_data(self):
+        response = self.client.get('/sensors_data/list')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(SensorsData.objects.all(), 1)

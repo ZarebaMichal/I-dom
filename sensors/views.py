@@ -2,14 +2,14 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from sensors.models import Sensors
+from sensors.models import Sensors, SensorsData
 from sensors.serializer import SensorsSerializer, SensorsDataSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ObjectDoesNotExist
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+#@permission_classes([IsAuthenticated])
 def list_of_sensors(request, format=None):
     """
     Get list of all sensors, only for authenticated users
@@ -99,6 +99,18 @@ def delete_sensor(request, pk, format=None):
     sensor.is_active = False
     sensor.save()
     return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def list_of_sensors_data(request, format=None):
+    """
+    Get list of all sensors data, only for authenticated users
+    :param request: GET
+    :return: list of all sensors if ok http 200 response
+    """
+    sensors_data = SensorsData.objects.all()
+    serializer = SensorsDataSerializer(sensors_data, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
