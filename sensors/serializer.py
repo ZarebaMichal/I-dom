@@ -1,20 +1,36 @@
 from rest_framework import serializers
 from sensors.models import Sensors, SensorsData
-from django.utils import timezone
 
 
-class SensorsSerializer(serializers.Serializer):
+class DynamicSensorsSerializer(serializers.ModelSerializer):
+    """
+    Class for creating dynamic fields in serializers
+    """
+    def __init__(self, *args, **kwargs):
+        fields = kwargs.pop('fields', None)
+
+        super(DynamicSensorsSerializer, self).__init__(*args, **kwargs)
+
+        if fields is not None:
+            allowed = set(fields)
+            existing = set(self.fields)
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)
+
+
+class SensorsSerializer(DynamicSensorsSerializer):
     CATEGORIES = [
         ('temperature', 'temperature'),
         ('humidity', 'humidity'),
     ]
 
     id = serializers.IntegerField(read_only=True)
-    name = serializers.CharField(max_length=30)
-    category = serializers.ChoiceField(choices=CATEGORIES)
-    battery_level = serializers.IntegerField(default=None)
-    notifications = serializers.BooleanField(default=True)
-    is_active = serializers.BooleanField(default=True)
+    name = serializers.CharField(max_length=30, required=False)
+    category = serializers.ChoiceField(choices=CATEGORIES, required=False)
+
+    class Meta:
+        model = Sensors
+        fields = ['id', 'name', 'category']
 
     @staticmethod
     def validate_name(value):
@@ -33,6 +49,10 @@ class SensorsSerializer(serializers.Serializer):
         :param validated_data:
         :return: new sensor instance
         """
+
+        if not validated_data.get('name') or not validated_data.get('category'):
+            raise serializers.ValidationError('You need to provide name and category of sensor')
+
         sensor = Sensors.objects.create(name=validated_data.get('name'),
                                         category=validated_data.get('category'),
                                         )
@@ -53,22 +73,9 @@ class SensorsSerializer(serializers.Serializer):
         return instance
 
 
-class SensorsDataSerializer(serializers.Serializer):
+class SensorsDataSerializer(serializers.ModelSerializer):
+    sensor = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name', queryset=Sensors.objects.all())
 
-    sensor_id = serializers.ReadOnlyField(source=Sensors.id)
-    delivery_time = serializers.DateTimeField(default=timezone.now)
-    sensor_data = serializers.CharField(max_length=20)
-
-    def create(self, validated_data):
-        """
-        Create instance of data collected by sensor.
-        :param validated_data:
-        :return:
-        """
-        sensor_data = SensorsData.oobjects.create(
-                                                  sensor_data=validated_data.get('sensor_data')
-                                                  )
-        return sensor_data
-
-    def update(self, instance, validated_data):
-        pass
+    class Meta:
+        model = SensorsData
+        fields = ("sensor", "sensor_data")

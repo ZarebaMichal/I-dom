@@ -1,12 +1,16 @@
 import json
 
+from rest_framework.exceptions import ErrorDetail
+
 from register.models import CustomUser
 from django.urls import reverse
 
 from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
 from django_rest_passwordreset.models import ResetPasswordToken
+from register.serializer import CustomUserSerializer, UpdateCustomUserSerializer
 from django.test import Client
+import unittest
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
@@ -134,7 +138,7 @@ class CreateUserAPIViewTestCase(APITestCase):
         }
 
         response = self.client.post('/users/add', user_data_2)
-        self.assertEqual(409, response.status_code)
+        self.assertEqual(400, response.status_code)
 
 
 class UsersListAPIViewTestCase(APITestCase):
@@ -148,6 +152,8 @@ class UsersListAPIViewTestCase(APITestCase):
         self.user = CustomUser.objects.create_user(
             self.username, self.email, self.password, self.telephone
         )
+
+        self.username2 = 'notme'
 
     def test_get_users_list(self):
         """
@@ -163,6 +169,13 @@ class UsersListAPIViewTestCase(APITestCase):
         response = self.client.get(f'/users/detail/{self.user.username}')
         self.assertEqual(200, response.status_code)
 
+    def test_get_user_which_doesnt_exist(self):
+        """
+        Test to get user detail who isn't existing
+        """
+        response = self.client.get(f'/users/detail/{self.username2}')
+        self.assertEqual(404, response.status_code)
+
 
 class UserUpdateAPIViewTestCase(APITestCase):
 
@@ -175,6 +188,8 @@ class UserUpdateAPIViewTestCase(APITestCase):
         self.user = CustomUser.objects.create_user(
             self.username, self.email, self.password, self.telephone
         )
+
+        self.user2_id = 10
 
         self.valid_payload = {
             'email': 'test1@test.pl',
@@ -190,6 +205,12 @@ class UserUpdateAPIViewTestCase(APITestCase):
             'app_notifications': True
         }
 
+        self.test_payload = {
+            'sms_notifications' : False,
+            'app_notifications' : False
+
+        }
+
     def test_update(self):
         """
         Test to verify if with validated data user can be updated
@@ -201,6 +222,20 @@ class UserUpdateAPIViewTestCase(APITestCase):
     def test_failed_update(self):
         response = self.client.put(f'/users/update/{self.user.pk}', self.non_valid_payload)
         self.assertEqual(400, response.status_code)
+
+    def test_no_user(self):
+        """
+        Test to verify if we can update user which doesn't exist
+        """
+        response = self.client.put(f'/users/update/{self.user2_id}', self.valid_payload)
+        self.assertEqual(404, response.status_code)
+
+    def test_only_notifications(self):
+        """
+        Test to verify if we can update user with only notifications.
+        """
+        response = self.client.put(f'/users/update/{self.user.pk}', self.test_payload)
+        self.assertEqual(200, response.status_code)
 
 
 class UserLoginAPIViewTestCase(APITestCase):
@@ -402,4 +437,103 @@ class DeleteUserAPIViewTestCase(APITestCase):
         """
         response = self.client.delete('/users/delete/35')
         self.assertEqual(404, response.status_code)
+
+
+class TestSerializer(unittest.TestCase):
+    """
+    Tests written for serializer
+    """
+    def setUp(self):
+
+        self.username = "TruboTest"
+        self.email = "chernobyl@gmail.com"
+        self.password = "ivdamke"
+        self.telephone = '+48606707808'
+
+        self.user = CustomUser.objects.create_user(
+            self.username, self.email, self.password, self.telephone
+        )
+
+        self.serializer_data = {
+            'username': 'Troll',
+            'email': 'chernobyl@gmail.com',
+            'password1': 'test',
+            'password2': 'test',
+            'telephone': ''
+        }
+
+        self.serializer_data_2 = {
+            'username': 'Troll',
+            'email': 'chernobyl2@gmail.com',
+            'password1': 'test',
+            'password2': 'test',
+            'telephone': '+48606707808'
+        }
+
+        # self.serializer_data = {
+        #     'username': 'Troll',
+        #     'email': 'chernobyl@gmail.com',
+        #     'password1': 'test',
+        #     'password2': 'test',
+        #     'telephone': '+48999111000'
+        # }
+        # self.serializer = CustomUserSerializer(data=self.serializer_data)
+
+    def test_serializer(self):
+
+        serializer = CustomUserSerializer(data=self.serializer_data)
+        self.assertEqual(serializer.is_valid(), False)
+        self.assertEqual(serializer.errors, {'email': [ErrorDetail(
+            string='Email address already exists', code='invalid')]})
+
+        serializer = CustomUserSerializer(data=self.serializer_data_2)
+        self.assertEqual(serializer.is_valid(), False)
+        self.assertEqual(serializer.errors, {'telephone': [ErrorDetail(
+            string='Telephone number already exists', code='invalid')]})
+
+
+class TestUpdateSerializer(unittest.TestCase):
+
+    def setUp(self):
+
+        self.username = "TruboTest2"
+        self.email = "chernobyl3@gmail.com"
+        self.password = "ivdamke"
+        self.telephone = '+48606707808'
+
+        self.user = CustomUser.objects.create_user(
+            self.username, self.email, self.password, self.telephone
+        )
+
+        self.serializer_data = {
+            'email': 'chernobyl4@gmail.com',
+            'telephone': '+48606707808'
+        }
+
+        self.serializer_data_2 = {
+            'email': 'chernobyl3@gmail.com'
+        }
+
+        self.serializer_data_3 = {
+            'sms_notifications': 'true',
+            'app_notifications': 'false'
+        }
+
+    def test_serializer(self):
+
+        serializer = UpdateCustomUserSerializer(data=self.serializer_data)
+        self.assertEqual(serializer.is_valid(), False)
+        self.assertEqual(serializer.errors, {'telephone': [ErrorDetail(
+            string='Telephone number already exists', code='invalid')]})
+
+        serializer = UpdateCustomUserSerializer(data=self.serializer_data_2)
+        self.assertEqual(serializer.is_valid(), False)
+        self.assertEqual(serializer.errors, {'email': [ErrorDetail(
+            string='Email address already exists', code='invalid')]})
+
+        serializer = UpdateCustomUserSerializer(data=self.serializer_data_3)
+        self.assertEqual(serializer.is_valid(), True)
+
+
+
 

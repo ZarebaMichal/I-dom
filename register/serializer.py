@@ -72,9 +72,6 @@ class CustomUserSerializer(serializers.Serializer):
             user.save()
             return user
 
-    def update(self, instance, validated_data):
-        pass
-
 
 class DynamicUpdateCustomUserSerializer(serializers.ModelSerializer):
     """
@@ -124,9 +121,6 @@ class UpdateCustomUserSerializer(DynamicUpdateCustomUserSerializer):
         if CustomUser.objects.filter(email=value).exists():
             raise serializers.ValidationError('Email address already exists')
         return value
-
-    def create(self, validated_data):
-        pass
 
     def update(self, instance, validated_data):
         """

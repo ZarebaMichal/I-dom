@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils import timezone
 
 
 class Sensors(models.Model):
@@ -15,11 +14,22 @@ class Sensors(models.Model):
     notifications = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
 
+    class Meta:
+        verbose_name = "Sensor"
+        verbose_name_plural = "Sensors"
+
     def __str__(self):
-        return self.name
+        return str(self.id)
 
 
 class SensorsData(models.Model):
-    sensor_id = models.ForeignKey(Sensors, on_delete=models.CASCADE)
-    delivery_time = models.DateTimeField(default=timezone.now)
+    sensor = models.ForeignKey(Sensors, on_delete=models.CASCADE)
+    delivery_time = models.DateTimeField(auto_now_add=True)
     sensor_data = models.CharField(max_length=20)
+
+    class Meta:
+        verbose_name = "Sensor data"
+        verbose_name_plural = "Sensors data"
+
+    def __str__(self):
+        return f"{self.sensor.id}: {self.sensor.name}"
