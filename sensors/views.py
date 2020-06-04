@@ -7,10 +7,11 @@ from sensors.serializer import SensorsSerializer, SensorsDataSerializer
 from rest_framework.permissions import IsAuthenticated
 import requests
 from django.core.exceptions import ObjectDoesNotExist
+from drf_yasg.utils import swagger_auto_schema
 
 
 @api_view(['GET'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def list_of_sensors(request, format=None):
     """
     Get list of all sensors, only for authenticated users
@@ -23,7 +24,7 @@ def list_of_sensors(request, format=None):
 
 
 @api_view(['POST'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def add_sensors(request, format=None):
     """
     Add new sensor, only for authenticated users
@@ -103,6 +104,7 @@ def delete_sensor(request, pk, format=None):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def list_of_sensors_data(request, format=None):
     """
     Get list of all sensors data, only for authenticated users
@@ -114,29 +116,22 @@ def list_of_sensors_data(request, format=None):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@swagger_auto_schema(methods=["post"], request_body=SensorsDataSerializer())
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def add_sensor_data(request):
-    try:
-        sensor = Sensors.objects.get(name=request.data['name'])
-    except ObjectDoesNotExist:
-        data = {
-            'detail': 'Sensor does not exist'
-        }
-        return Response(data, status=status.HTTP_404_NOT_FOUND)
-
-    data = {
-        'sensor_id': sensor.id,
-        'sensor_data': request.data['sensor_data']
-    }
-    serializer = SensorsDataSerializer(data=data)
+    serializer = SensorsDataSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
+        if 'sensor' in serializer.errors:
+            return Response({'detail': 'Sensor does not exist'}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def change_frequency_data(request, pk):
     try:
         time_seconds = int(request.data['frequency'])

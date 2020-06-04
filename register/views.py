@@ -9,12 +9,13 @@ import json
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def users_list(request, format=None):
     """
     List all users if ok http 200 response
     """
     if request.method == 'GET':
-        users = CustomUser.objects.all()
+        users = CustomUser.objects.all() if request.user.is_staff else CustomUser.objects.filter(id=request.user.id)
         serializer = CustomUserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -86,6 +87,7 @@ def delete_user(request, pk, format=None):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def logout_user(request, token):
     """
     Delete user's token. If token doesn't exist return 404,

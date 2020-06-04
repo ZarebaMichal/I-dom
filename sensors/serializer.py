@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from sensors.models import Sensors, SensorsData
-from django.utils import timezone
 
 
 class DynamicSensorsSerializer(serializers.ModelSerializer):
@@ -8,14 +7,11 @@ class DynamicSensorsSerializer(serializers.ModelSerializer):
     Class for creating dynamic fields in serializers
     """
     def __init__(self, *args, **kwargs):
-        # Don't pass the 'fields' arg up to the superclass
         fields = kwargs.pop('fields', None)
 
-        # Instantiate the superclass normally
         super(DynamicSensorsSerializer, self).__init__(*args, **kwargs)
 
         if fields is not None:
-            # Drop any fields that are not specified in the `fields` argument.
             allowed = set(fields)
             existing = set(self.fields)
             for field_name in existing - allowed:
@@ -31,9 +27,6 @@ class SensorsSerializer(DynamicSensorsSerializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(max_length=30, required=False)
     category = serializers.ChoiceField(choices=CATEGORIES, required=False)
-    # battery_level = serializers.IntegerField(default=None)
-    # notifications = serializers.BooleanField(default=True)
-    # is_active = serializers.BooleanField(default=True)
 
     class Meta:
         model = Sensors
@@ -80,18 +73,9 @@ class SensorsSerializer(DynamicSensorsSerializer):
         return instance
 
 
-class SensorsDataSerializer(serializers.Serializer):
+class SensorsDataSerializer(serializers.ModelSerializer):
+    sensor = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name', queryset=Sensors.objects.all())
 
-    sensor_id = serializers.SlugRelatedField(read_only=False, slug_field='id', queryset=Sensors.objects.all())
-    delivery_time = serializers.DateTimeField(default=timezone.now)
-    sensor_data = serializers.CharField(max_length=20)
-
-    def create(self, validated_data):
-        """
-        Create instance of data collected by sensor.
-        :param validated_data:
-        :return:
-        """
-        data = SensorsData.objects.create(sensor_id=validated_data.get('sensor_id'),
-                                          sensor_data=validated_data.get('sensor_data'))
-        return data
+    class Meta:
+        model = SensorsData
+        fields = ("sensor", "sensor_data")
