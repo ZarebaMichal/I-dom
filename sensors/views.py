@@ -18,7 +18,7 @@ def list_of_sensors(request, format=None):
     :param request: GET
     :return: list of all sensors if ok http 200 response
     """
-    sensors = Sensors.objects.all()
+    sensors = Sensors.objects.all(is_active=True)
     serializer = SensorsSerializer(sensors, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
