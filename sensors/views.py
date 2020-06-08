@@ -121,6 +121,11 @@ def list_of_sensors_data(request, format=None):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_sensor_data(request):
+    """
+    Endpoint for adding sensor data for sensor requests
+    :param request:
+    :return:
+    """
     serializer = SensorsDataSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -134,7 +139,12 @@ def add_sensor_data(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def change_frequency_data(request, pk):
-
+    """
+    Endpoint for changing frequency in sensor
+    :param request:
+    :param pk:
+    :return:
+    """
     try:
         sensor = Sensors.objects.get(pk=pk)
     except Sensors.DoesNotExist:
@@ -169,10 +179,15 @@ def change_frequency_data(request, pk):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_last_data(request, pk):
+    """
+    Endpoint returning last data from chosen sensor
+    :param request:
+    :param pk:
+    :return:
+    """
     try:
         sensor_data = SensorsData.objects.filter(sensor_id=pk).latest('delivery_time')
-    except Sensors.DoesNotExist:
+    except SensorsData.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     else:
         return Response(sensor_data.sensor_data, status=status.HTTP_200_OK)
-

@@ -5,7 +5,7 @@ from rest_framework.exceptions import ErrorDetail
 from register.models import CustomUser
 from django.urls import reverse
 
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
 from rest_framework.authtoken.models import Token
 from django_rest_passwordreset.models import ResetPasswordToken
 from register.serializer import CustomUserSerializer, UpdateCustomUserSerializer
@@ -152,6 +152,9 @@ class UsersListAPIViewTestCase(APITestCase):
         self.user = CustomUser.objects.create_user(
             self.username, self.email, self.password, self.telephone
         )
+
+        self.token = Token.objects.create(user=self.user)
+        self.client = APIClient(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
         self.username2 = 'notme'
 
@@ -323,6 +326,8 @@ class UserLogoutAPIViewTestCase(APITestCase):
         )
         self.token = Token.objects.create(user=self.user)
 
+        self.client = APIClient(HTTP_AUTHORIZATION='Token ' + self.token.key)
+
     def test_logout_without_token(self):
         """
         Test to verify response if user doesn't give his token
@@ -470,15 +475,6 @@ class TestSerializer(unittest.TestCase):
             'telephone': '+48606707808'
         }
 
-        # self.serializer_data = {
-        #     'username': 'Troll',
-        #     'email': 'chernobyl@gmail.com',
-        #     'password1': 'test',
-        #     'password2': 'test',
-        #     'telephone': '+48999111000'
-        # }
-        # self.serializer = CustomUserSerializer(data=self.serializer_data)
-
     def test_serializer(self):
 
         serializer = CustomUserSerializer(data=self.serializer_data)
@@ -520,7 +516,6 @@ class TestUpdateSerializer(unittest.TestCase):
         }
 
     def test_serializer(self):
-
         serializer = UpdateCustomUserSerializer(data=self.serializer_data)
         self.assertEqual(serializer.is_valid(), False)
         self.assertEqual(serializer.errors, {'telephone': [ErrorDetail(
@@ -533,6 +528,7 @@ class TestUpdateSerializer(unittest.TestCase):
 
         serializer = UpdateCustomUserSerializer(data=self.serializer_data_3)
         self.assertEqual(serializer.is_valid(), True)
+
 
 
 

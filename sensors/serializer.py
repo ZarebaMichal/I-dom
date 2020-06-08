@@ -2,7 +2,6 @@ from rest_framework import serializers
 from sensors.models import Sensors, SensorsData
 
 
-
 class DynamicSensorsSerializer(serializers.ModelSerializer):
     """
     Class for creating dynamic fields in serializers
@@ -59,6 +58,11 @@ class SensorsSerializer(DynamicSensorsSerializer):
         return value
 
     def get_last_data(self, obj):
+        """
+        Check for last data added for sensor
+        :param obj:
+        :return:
+        """
         last_data = obj.sensorsdata_set.last()
         if last_data is not None:
             return last_data.sensor_data
