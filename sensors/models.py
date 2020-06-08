@@ -13,6 +13,7 @@ class Sensors(models.Model):
     battery_level = models.IntegerField(blank=True, null=True)
     notifications = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
+    frequency = models.IntegerField(default=300)
 
     class Meta:
         verbose_name = "Sensor"

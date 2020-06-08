@@ -149,7 +149,7 @@ def change_frequency_data(request, pk):
     }
 
     try:
-        response = requests.post('http://192.168.1.7', data=data_for_sensor)
+        response = requests.post('http://192.168.1.21:8000/receive', data=data_for_sensor)
         response.raise_for_status()
 
     except requests.exceptions.ConnectionError:

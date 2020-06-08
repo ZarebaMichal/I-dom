@@ -27,10 +27,11 @@ class SensorsSerializer(DynamicSensorsSerializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(max_length=30, required=False)
     category = serializers.ChoiceField(choices=CATEGORIES, required=False)
+    frequency = serializers.IntegerField(default=300)
 
     class Meta:
         model = Sensors
-        fields = ['id', 'name', 'category']
+        fields = ['id', 'name', 'category', 'frequency']
 
     @staticmethod
     def validate_name(value):
@@ -41,6 +42,17 @@ class SensorsSerializer(DynamicSensorsSerializer):
         """
         if Sensors.objects.filter(name=value).exists():
             raise serializers.ValidationError('Sensor with provided name already exists')
+        return value
+
+    @staticmethod
+    def validate_frequency(value):
+        """
+        Check if given frequency is greater than 0 and less than int max value
+        :param value:
+        :return:
+        """
+        if value <= 0 or value >= 21474836:
+            raise serializers.ValidationError('Frequency must be between 1 or 21474836')
         return value
 
     def create(self, validated_data):
