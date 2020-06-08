@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 import requests
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
+from django.db.models import Prefetch
 
 
 @api_view(['GET'])
@@ -118,7 +119,7 @@ def list_of_sensors_data(request, format=None):
 
 @swagger_auto_schema(methods=["post"], request_body=SensorsDataSerializer())
 @api_view(['POST'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def add_sensor_data(request):
     serializer = SensorsDataSerializer(data=request.data)
     if serializer.is_valid():
@@ -133,25 +134,29 @@ def add_sensor_data(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def change_frequency_data(request, pk):
-    try:
-        time_seconds = int(request.data['frequency'])
-    except KeyError:
-        data = {
-            'detail': 'You need to provide frequency time'
-        }
-        return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-    sensor_id = pk
+    try:
+        sensor = Sensors.objects.get(pk=pk)
+    except Sensors.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    serializer = SensorsSerializer(sensor, data=request.data)
+
+    if serializer.is_valid():
+        serializer.save()
+    else:
+        if 'sensor' in serializer.errors:
+            return Response({'detail': 'Sensors does not exists'}, status=status.HTTP_404_NOT_FOUND)
+        elif 'frequency' in serializer.errors:
+            return Response({'detail': 'Frequency must be between 1 and 21474836'}, status=status.HTTP_400_BAD_REQUEST)
 
     data_for_sensor = {
-        'id': sensor_id,
-        'frequency': time_seconds * 1000
+        'id': sensor.id,
+        'frequency': sensor.frequency
     }
-
     try:
         response = requests.post('http://192.168.1.21:8000/receive', data=data_for_sensor)
         response.raise_for_status()
-
     except requests.exceptions.ConnectionError:
         return Response(data_for_sensor, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
@@ -159,3 +164,15 @@ def change_frequency_data(request, pk):
         return Response(status=status.HTTP_408_REQUEST_TIMEOUT)
 
     return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_last_data(request, pk):
+    try:
+        sensor_data = SensorsData.objects.filter(sensor_id=pk).latest('delivery_time')
+    except Sensors.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    else:
+        return Response(sensor_data.sensor_data, status=status.HTTP_200_OK)
+
