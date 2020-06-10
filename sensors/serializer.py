@@ -27,7 +27,6 @@ class SensorsSerializer(DynamicSensorsSerializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(max_length=30, required=False)
     category = serializers.ChoiceField(choices=CATEGORIES, required=False)
-    frequency = serializers.IntegerField(default=300)
 
     last_data = serializers.SerializerMethodField()
 
@@ -94,7 +93,7 @@ class SensorsSerializer(DynamicSensorsSerializer):
         """
         instance.name = validated_data.get('name', instance.name)
         instance.category = validated_data.get('category', instance.category)
-        instance.frequency = validated_data.get('frequency', instance.category)
+        instance.frequency = validated_data.get('frequency', instance.frequency)
         instance.save()
 
         return instance
