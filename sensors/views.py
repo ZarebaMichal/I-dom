@@ -191,3 +191,29 @@ def get_last_data(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
     else:
         return Response(sensor_data.sensor_data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def add_sensor_ip_address(request):
+    """
+    Endpoint for adding ip address for given sensor name
+    :param request:
+    :param pk:
+    :return:
+    """
+    try:
+        sensor = Sensors.objects.get(name=request.data['name'])
+    except ObjectDoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    data = {
+        'ip_address': request.data['ip_address']
+    }
+
+    serializer = SensorsSerializer(sensor, data)
+    if serializer.is_valid():
+        serializer.save()
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(serializer.data, status=status.HTTP_200_OK)

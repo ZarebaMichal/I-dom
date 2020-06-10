@@ -33,13 +33,13 @@ class AddSensorAPIViewTestCase(APITestCase):
         self.sensor = Sensors.objects.create(name=self.name, category=self.category)
 
     def test_add_sensor_with_valid_data_category_temp(self):
-        response = self.client.post('/sensors/add', {'name': 'temperatura_pokoj', 'category': 'temperature'})
+        response = self.client.post('/sensors/add', {'name': 'temperatura_pokoj', 'category': 'temperature', 'frequency': '3500'})
         self.assertEqual(201, response.status_code)
         self.assertTrue(Sensors.objects.filter(name='temperatura_pokoj').exists())
         self.assertEqual(Sensors.objects.all().count(), 2)
 
     def test_add_sensor_with_valid_data_category_hum(self):
-        response = self.client.post('/sensors/add', {'name': 'wilg_pokoj', 'category': 'humidity'})
+        response = self.client.post('/sensors/add', {'name': 'wilg_pokoj', 'category': 'humidity', 'frequency': '3000'})
         self.assertEqual(201, response.status_code)
         self.assertTrue(Sensors.objects.filter(name='wilg_pokoj').exists())
         self.assertEqual(Sensors.objects.all().count(), 2)
@@ -65,7 +65,7 @@ class AddSensorAPIViewTestCase(APITestCase):
         self.assertTrue(Sensors.objects.all().count(), 1)
 
     def test_add_sensor_with_invalid_category(self):
-        response = self.client.post('/sensors/add', {'name': 'testowanko', 'category': 'x'})
+        response = self.client.post('/sensors/add', {'name': 'testowanko', 'category': 'x', 'frequency': '333333'})
         self.assertEqual(400, response.status_code)
         self.assertTrue(Sensors.objects.all().count(), 1)
 
@@ -348,6 +348,59 @@ class ChangeFrequencyAPITestCase(APITestCase):
 
         self.id = 3
 
-    def change_frequency_sensor_doesnt_exist(self):
+    def test_change_frequency_sensor_doesnt_exist(self):
         response = self.client.post(f'/sensors_data/frequency/{self.id}')
         self.assertEqual(404, response.status_code)
+
+class AddIpAddressAPITestCase(APITestCase):
+
+    def setUp(self):
+        self.username = "CheekiBreeki"
+        self.email = "chernobyl@gmail.com"
+        self.password = "ivdamke"
+        self.telephone = '+48999111000'
+
+        self.user = CustomUser.objects.create_user(
+            self.username, self.email, self.password, self.telephone
+        )
+
+        self.token = Token.objects.create(user=self.user)
+        self.client = APIClient(HTTP_AUTHORIZATION='Token ' + self.token.key)
+
+        self.name = 'piwnica'
+        self.category = 'temperature'
+
+        self.sensor_data = '324324'
+
+        self.sensor = Sensors.objects.create(name=self.name, category=self.category)
+
+        self.data = SensorsData.objects.create(sensor=Sensors.objects.get(name=self.name, category=self.category),
+                                               sensor_data=self.sensor_data)
+
+
+        self.invalid_ip = {
+            'name': self.name,
+            'ip_address': '11112222'
+        }
+
+        self.wrong_sensor = {
+            'name': 'nie_ma_takiego_sensora',
+            'ip_address': '192.168.1.7'
+        }
+
+        self.correct_data = {
+            'name': self.name,
+            'ip_address': '192.168.1.7'
+        }
+
+    def test_add_invalid_ip(self):
+        response = self.client.post('/sensors/ip', self.invalid_ip)
+        self.assertEqual(400, response.status_code)
+
+    def test_add_not_existing_sensor(self):
+        response = self.client.post('/sensors/ip', self.wrong_sensor)
+        self.assertEqual(404, response.status_code)
+
+    def test_add_valid_ip_and_sensor(self):
+        response = self.client.post('/sensors/ip', self.correct_data)
+        self.assertEqual(200, response.status_code)

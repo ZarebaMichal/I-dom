@@ -14,6 +14,7 @@ class Sensors(models.Model):
     notifications = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     frequency = models.IntegerField(default=300)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Sensor"
