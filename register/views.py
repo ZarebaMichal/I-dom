@@ -5,6 +5,7 @@ from register.models import CustomUser
 from register.serializer import CustomUserSerializer, UpdateCustomUserSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from .permissions import IsUpdateProfile
 import json
 
 
@@ -36,6 +37,7 @@ def register_user(request, format=None):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated & IsUpdateProfile | IsAdminUser])
 def user_detail(request, username, format=None):
     """
     Retrieve data of user. If user doesn't exist return 404,
@@ -52,6 +54,7 @@ def user_detail(request, username, format=None):
 
 
 @api_view(['PUT'])
+@permission_classes([IsAuthenticated & IsUpdateProfile | IsAdminUser])
 def update_user(request, pk, format=None):
     """
     Update user. If user doesn't exist return 404,
@@ -65,12 +68,13 @@ def update_user(request, pk, format=None):
     serializer = UpdateCustomUserSerializer(user, data=request.data)
     if serializer.is_valid():
         serializer.save()
+
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated & IsUpdateProfile | IsAdminUser])
 def delete_user(request, pk, format=None):
     """
     Delete user by his ID. Only for admins. If user doesn't exist return 404,

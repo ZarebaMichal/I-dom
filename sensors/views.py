@@ -119,7 +119,6 @@ def list_of_sensors_data(request, format=None):
 
 @swagger_auto_schema(methods=["post"], request_body=SensorsDataSerializer())
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def add_sensor_data(request):
     """
     Endpoint for adding sensor data for sensor requests
