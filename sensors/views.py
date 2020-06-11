@@ -24,6 +24,7 @@ def list_of_sensors(request, format=None):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@swagger_auto_schema(methods=["post"], request_body=SensorsSerializer())
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_sensors(request, format=None):
@@ -113,6 +114,19 @@ def list_of_sensors_data(request, format=None):
     :return: list of all sensors if ok http 200 response
     """
     sensors_data = SensorsData.objects.all()
+    serializer = SensorsDataSerializer(sensors_data, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_of_sensors_data_from_one_sensor(request, pk,  format=None):
+    """
+    Get list of all sensors data, only for authenticated users
+    :param request: GET
+    :return: list of all sensors if ok http 200 response
+    """
+    sensors_data = SensorsData.objects.filter(pk=pk)
     serializer = SensorsDataSerializer(sensors_data, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 

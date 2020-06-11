@@ -104,4 +104,4 @@ class SensorsDataSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SensorsData
-        fields = ("sensor", "sensor_data")
+        fields = ("sensor", "delivery_time", "sensor_data")
