@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from requests import Response
@@ -10,7 +11,7 @@ import requests
 def do_something_if_changed(sender, instance, **kwargs):
     try:
         sensor = Sensors.objects.get(pk=instance.pk)
-    except Sensors.DoesNotExisit:
+    except ObjectDoesNotExist:
         pass # Object is new, so field hasn't technically changed, but you may want to do something else here.
     else:
         if not sensor.frequency == instance.frequency: # Field has changed
