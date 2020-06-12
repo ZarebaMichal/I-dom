@@ -1,3 +1,4 @@
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -21,6 +22,7 @@ def users_list(request, format=None):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@swagger_auto_schema(methods=["post"], request_body=CustomUserSerializer())
 @api_view(['POST'])
 def register_user(request, format=None):
     """
@@ -53,6 +55,7 @@ def user_detail(request, username, format=None):
         return Response(serializer.data)
 
 
+@swagger_auto_schema(methods=["put"], request_body=UpdateCustomUserSerializer())
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated & IsUpdateProfile | IsAdminUser])
 def update_user(request, pk, format=None):

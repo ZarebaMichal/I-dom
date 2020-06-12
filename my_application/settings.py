@@ -25,7 +25,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG')
 
-ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.100', 'raspberry2020.ddns.net']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.100', 'raspberry2020.ddns.net']
 
 
 # Application definition
