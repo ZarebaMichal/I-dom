@@ -8,7 +8,7 @@ class IsUpdateProfile(permissions.BasePermission):
     def has_permission(self, request, view):
         # can write custom code
         # print view.kwargs
-        if view.kwargs['pk']:
+        if 'pk' in view.kwargs:
             try:
                 user_profile = CustomUser.objects.get(
                     pk=view.kwargs['pk'])
@@ -22,7 +22,7 @@ class IsUpdateProfile(permissions.BasePermission):
         else:
             try:
                 user_profile = CustomUser.objects.get(
-                    pk=view.kwargs['username'])
+                    username=view.kwargs['username'])
             except ObjectDoesNotExist:
                 return False
 
