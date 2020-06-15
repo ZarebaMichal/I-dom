@@ -126,7 +126,7 @@ def list_of_sensors_data_from_one_sensor(request, pk,  format=None):
     :param request: GET
     :return: list of all sensors if ok http 200 response
     """
-    sensors_data = SensorsData.objects.filter(pk=pk)
+    sensors_data = SensorsData.objects.filter(sensor=pk)
     serializer = SensorsDataSerializer(sensors_data, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
