@@ -1,0 +1,67 @@
+!/bin/bash
+
+# apt update
+sudo apt-get update && sudo apt-get -y upgrade
+
+# MySql install
+sudo apt-get -y install mysql-server
+
+# Mysql config
+sudo mysql_secure_installation utility -y
+
+# MySql lib
+sudo apt-get install libmysqlclient-dev -y
+
+# Apache install
+sudo apt-get install apache2 -y
+
+# Create mysql database
+sudo mysql -e 'CREATE DATABASE my_application'
+
+# Python install
+sudo apt-get install -y python3
+
+# Pip install
+sudo apt-get install -y python3-pip
+
+# Virutalenv install
+pip3 install virtualenv
+
+# Install django inside specific virtualenv
+virtualenv I-dom
+. I-dom/bin/activate
+cd I-dom
+git clone -b develop https://github.com/ZarebaMichal/I-dom.git I-DOM
+cd I-DOM
+pip install -r requirements.txt
+python3 manage.py makemigrations
+python3 manage.py migrate
+python3 manage.py createsuperuser
+deactivate
+
+# Apache config
+cp ~/I-dom/I-DOM/my_application.conf //etc/apache2/conf-available/my_application.conf
+cp ~/I-dom/I-DOM/000-default.conf //etc/apache2/sites-available/000-default.conf
+cp ~/I-dom/I-DOM/ports.conf //etc/apache2/sites-available/ports.conf
+sudo a2enconf my_application
+sudo service apache2 restart
+
+# Frontend install
+sudo apt-get install nodejs -y
+sudo apt-get install npm
+cd ~
+mkdir frontend
+cd frontend
+git clone https://github.com/adriannajmrocki/idom.git
+npm install
+npm run build
+
+
+
+# Nginx install
+sudo apt-get nginx -y
+cp ~/I-dom/I-DOM/default //etc/nginx/sites-enabled/default
+sudo killall nginx
+sudo nginx
+
+

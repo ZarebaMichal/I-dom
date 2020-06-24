@@ -1,0 +1,27 @@
+server {
+        listen 80;
+        listen [::]:80;
+
+        root /var/wwww/nginx;
+        location  /api {
+                proxy_set_header X-Forwarded_For $proxy_add_x_forwarded_for;
+                proxy_set_header Host $http_post;
+                proxy_redirect off;
+                #rewrite ^/api(.*) $1 break;
+                proxy_pass http://127.0.0.1:8001/;
+        }
+        location / {
+                #rewrite ^/web(.*) $1 break;
+                proxy_pass http://127.0.0.1:8005/;
+        }
+}
+
+server {
+        listen 8005;
+        server_name localhost;
+
+        location / {
+                root /home/ubuntu/Frontend/idom/build;
+                        index index.html index.htm;
+        }
+}
