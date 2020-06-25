@@ -14,11 +14,14 @@ sudo apt-get install libmysqlclient-dev -y
 
 # Apache install
 sudo apt-get install apache2 -y
+sudo apt-get install libapache2-mod-wsgi-py3
+sudo a2enmod wsgi
 
 # Create mysql database
-sudo mysql -e 'CREATE DATABASE my_application;'
-sudo mysql -e 'CREATE USER `test`@`%` IDENTIFIED BY `zaq1@WSX`;'
-sudo mysql -e 'GRANT ALL PRIVILEGES ON my_application.* TO `test`;'
+sudo mysql
+#sudo mysql -e 'CREATE DATABASE my_application;'
+#sudo mysql -e 'CREATE USER `test`@`%` IDENTIFIED BY `zaq1@WSX`;'
+#sudo mysql -e 'GRANT ALL PRIVILEGES ON my_application.* TO `test`;'
 
 
 # Python install
@@ -36,7 +39,7 @@ virtualenv I-dom
 cd I-dom
 git clone -b develop https://github.com/ZarebaMichal/I-dom.git I-DOM
 cd I-DOM
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 python3 manage.py makemigrations
 python3 manage.py migrate
 python3 manage.py createsuperuser
@@ -70,8 +73,3 @@ sudo cp /home/ubuntu/I-dom/I-DOM/default //etc/nginx/sites-enabled/default
 sudo killall nginx
 sudo nginx
 
-
-# Apache2 cdn
-
-sudo apt-get install libapache2-mod-wsgi-py3
-sudo a2enmod wsgi
