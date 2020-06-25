@@ -16,9 +16,10 @@ sudo apt-get install libmysqlclient-dev -y
 sudo apt-get install apache2 -y
 
 # Create mysql database
-sudo mysql -e 'CREATE DATABASE my_application'
-sudo mysql -e 'CREATE USER 'test'@'localhost' IDENTIFIED BY 'test''
-sudo mysql -e 'GRANT  ALL PRIVILEGES ON my_application.* TO 'test'@'localhost''
+sudo mysql -e 'CREATE DATABASE my_application;'
+sudo mysql -e 'CREATE USER `test`@`%` IDENTIFIED BY `zaq1@WSX`;'
+sudo mysql -e 'GRANT ALL PRIVILEGES ON my_application.* TO `test`;'
+
 
 # Python install
 sudo apt-get install -y python3
@@ -40,7 +41,7 @@ python3 manage.py makemigrations
 python3 manage.py migrate
 python3 manage.py createsuperuser
 cd my_application
-nano .env
+sudo nano .env
 deactivate
 
 # Apache config
