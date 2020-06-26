@@ -53,7 +53,7 @@ deactivate
 # Apache config
 sudo cp /home/ubuntu/I-dom/I-DOM/my_application.conf //etc/apache2/conf-available/my_application.conf
 sudo cp /home/ubuntu/I-dom/I-DOM/000-default.conf //etc/apache2/sites-available/000-default.conf
-sudo cp /home/ubuntu/I-dom/I-DOM/ports.conf //etc/apache2/sites-available/ports.conf
+sudo cp /home/ubuntu/I-dom/I-DOM/ports.conf //etc/apache2/ports.conf
 sudo a2enconf my_application
 sudo service apache2 restart
 
