@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Python install
+sudo apt-get install -y python3
+
+# Pip install
+sudo apt-get install -y python3-pip
+
+# Virutalenv install
+sudo pip3 install virtualenv
+
 # apt update
 sudo apt-get update && sudo apt-get -y upgrade
 
@@ -23,15 +32,6 @@ sudo mysql
 #sudo mysql -e 'CREATE USER `test`@`%` IDENTIFIED BY `zaq1@WSX`;'
 #sudo mysql -e 'GRANT ALL PRIVILEGES ON my_application.* TO `test`;'
 
-
-# Python install
-sudo apt-get install -y python3
-
-# Pip install
-sudo apt-get install -y python3-pip
-
-# Virutalenv install
-pip3 install virtualenv
 
 # Install django inside specific virtualenv
 virtualenv I-dom
@@ -70,7 +70,7 @@ npm run build
 
 
 # Nginx install
-sudo apt-get nginx -y
+sudo apt-get install nginx -y
 sudo cp /home/ubuntu/I-dom/I-DOM/default //etc/nginx/sites-enabled/default
 sudo killall nginx
 sudo nginx
