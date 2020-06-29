@@ -1,6 +1,6 @@
-# I-dom
+# IDOM
 
-I-dom is (engineering project) django-backend application for running smart house created with raspberry pi and sensors.
+IDOM is (engineering project) django-backend application for running smart house created with raspberry pi and sensors.
 
 # Installation
 
