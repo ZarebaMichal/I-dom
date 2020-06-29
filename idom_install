@@ -75,4 +75,7 @@ sudo apt-get install nginx -y
 sudo cp /home/ubuntu/I-dom/I-DOM/default //etc/nginx/sites-enabled/default
 sudo killall nginx
 sudo nginx
+sudo a2enmod ssl
+sudo systemctl restart apache2
+
 
