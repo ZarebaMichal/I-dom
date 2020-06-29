@@ -15,7 +15,7 @@ and copy idom_installator file from repo. Then enter:
 You need to create mysql database and user with command:
 ```mysql
 create database my_application;
-create user 'your_username'@'%' identified by 'your_password
+create user 'your_username'@'%' identified by 'your_password';
 grant all privileges to my_application.* to 'your_username';
 ```
 
