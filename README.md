@@ -42,7 +42,8 @@ install it with given instructions on their website.
 
 To list all endpoints in our application, just enter **your_domain_from_dataplicity.io/api/swagger**
 
-For video instructions, visit [our project's website](https://adriannajmrocki.github.io/idom-website/)
+For video instructions, and android app, visit [our project's website](https://adriannajmrocki.github.io/idom-website/)
+To use it on android you need to provide **your_domain_from_dataplicity.io/api** in **edit server address** 
 
 # Project status
 
