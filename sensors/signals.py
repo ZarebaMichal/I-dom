@@ -17,7 +17,8 @@ def do_something_if_changed(sender, instance, **kwargs):
         if not sensor.frequency == instance.frequency: # Field has changed
             # do something
             data_for_sensor = {
-                'id': sensor.id,
+                #'id': sensor.id,
+                'name': sensor.name,
                 'frequency': instance.frequency
             }
             try:
