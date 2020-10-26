@@ -21,24 +21,25 @@ from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from core.views import index
 
-schema_view = get_schema_view(
-    openapi.Info(
-        title="Snippets API",
-        default_version='v1',
-        description="Test description",
-        terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="contact@snippets.local"),
-        license=openapi.License(name="BSD License"),
-    ),
-    public=True,
-    permission_classes=(permissions.AllowAny,),
-)
-
-decorated_obtain_token_view = swagger_auto_schema(
-    method='POST',
-    request_body=AuthTokenSerializer()
-)(obtain_auth_token)
+# schema_view = get_schema_view(
+#     openapi.Info(
+#         title="Snippets API",
+#         default_version='v1',
+#         description="Test description",
+#         terms_of_service="https://www.google.com/policies/terms/",
+#         contact=openapi.Contact(email="contact@snippets.local"),
+#         license=openapi.License(name="BSD License"),
+#     ),
+#     public=True,
+#     permission_classes=(permissions.AllowAny,),
+# )
+#
+# decorated_obtain_token_view = swagger_auto_schema(
+#     method='POST',
+#     request_body=AuthTokenSerializer()
+# )(obtain_auth_token)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -47,7 +48,9 @@ urlpatterns = [
     # API' urls
     path('', include('register.urls')),
     path('', include('sensors.urls')),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('api-token-auth/', decorated_obtain_token_view, name='api_token_auth'),
-    path('password-reset/', include('django_rest_passwordreset.urls', namespace='password_reset'))
+    path('', include('cameras.urls')),
+    #path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    #path('api-token-auth/', decorated_obtain_token_view, name='api_token_auth'),
+    path('password-reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+    path('', index, name='index')
 ]
