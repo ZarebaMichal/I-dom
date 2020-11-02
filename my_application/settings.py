@@ -46,7 +46,10 @@ INSTALLED_APPS = [
     'phonenumber_field',
     'django_rest_passwordreset',
     'sensors',
+    'fcm_django',
     ]
+
+FCM_SERVER_KEY = "AIzaSyB_iSlgdRl77JXEgUmAu3d1U4xubpni2xY"
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

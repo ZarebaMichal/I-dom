@@ -6,6 +6,8 @@ class Sensors(models.Model):
     CATEGORIES = [
         ('temperature', 'temperature'),
         ('humidity', 'humidity'),
+        ('gas', 'gas'),
+        ('smoke', 'smoke'),
     ]
     id = models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
     name = models.CharField(max_length=30, unique=True)
