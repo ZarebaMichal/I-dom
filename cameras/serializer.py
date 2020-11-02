@@ -2,7 +2,26 @@ from rest_framework import serializers
 from cameras.models import Cameras
 
 
-class CamerasSerializer(serializers.Serializer):
+class DynamicSensorsSerializer(serializers.ModelSerializer):
+    """
+    Class for creating dynamic fields in serializers
+    """
+    def __init__(self, *args, **kwargs):
+        fields = kwargs.pop('fields', None)
+
+        super(DynamicSensorsSerializer, self).__init__(*args, **kwargs)
+
+        if fields is not None:
+            allowed = set(fields)
+            existing = set(self.fields)
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)
+
+
+class CamerasSerializer(DynamicSensorsSerializer):
+    """
+    Serializer for camera model, with name and IP address validation
+    """
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(max_length=30, required=False)
 
@@ -18,7 +37,18 @@ class CamerasSerializer(serializers.Serializer):
         :return:
         """
         if Cameras.objects.filter(name=value).exists():
-            raise serializers.ValidationError('Sensor with provided name already exists')
+            raise serializers.ValidationError('Camera with provided name already exists')
+        return value
+
+    @staticmethod
+    def validate_ip(value):
+        """
+        Check if camera with provided IP address exists in database.
+        :param value:
+        :return:
+        """
+        if Cameras.objects.filter(ip_address=value).exists():
+            raise serializers.ValidationError('Camera with provided IP address already exists')
         return value
 
     def create(self, validated_data):
@@ -29,7 +59,7 @@ class CamerasSerializer(serializers.Serializer):
         """
 
         if not validated_data.get('name'):
-            raise serializers.ValidationError('You need to provide name of the sensor')
+            raise serializers.ValidationError('You need to provide name of the camera')
 
         camera = Cameras.objects.create(name=validated_data.get('name'))
         camera.save()

@@ -10,6 +10,5 @@ urlpatterns = [
     path('cameras/delete/<int:pk>', views.delete_camera),
     path('cameras/ip', views.add_camera_ip_address),
     path('xd', views.index, name='index'),
-    #path('video_feed', views.video_feed, name='video_feed'),
-    path('webcam_feed', views.webcam_feed, name='webcam_feed'),
+    path('cameras/stream/<int:pk>', views.ip_cam, name='ip_cam'),
 ]

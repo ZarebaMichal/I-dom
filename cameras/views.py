@@ -19,14 +19,30 @@ def index(request):
 
 
 def gen(camera):
+    """
+    Function for rendering camera feed frame by frame.
+    :param camera:
+    :return:
+    """
     while True:
         frame = camera.get_frame()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
 
-def webcam_feed(request):
-    return StreamingHttpResponse(gen(VideoCamera()),
+#@permission_classes([IsAuthenticated])
+def ip_cam(pk):
+    """
+    Render video stream from IP camera, find IP address and create
+    VideoCamera instance. Return 404 if camera with given id doesn't exist.
+    :param pk: id of IP camera in database
+    :return:
+    """
+    try:
+        camera = Cameras.objects.get(pk=pk)
+    except Cameras.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    return StreamingHttpResponse(gen(VideoCamera(camera.ip_address)),
                                  content_type='multipart/x-mixed-replace; boundary=frame')
 
 
@@ -81,12 +97,12 @@ def camera_detail(request, pk, format=None):
 
 
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+#@permission_classes([IsAuthenticated])
 def update_camera(request, pk, format=None):
     """
     Update data of camera
     :param request: PUT
-    :param pk: id of sensor
+    :param pk: id of camera
     :return: If camera doesn't exist return 404,
             if given invalid data, return 400,
             else if succeeded return 200
@@ -146,5 +162,4 @@ def add_camera_ip_address(request):
         serializer.save()
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     return Response(serializer.data, status=status.HTTP_200_OK)
