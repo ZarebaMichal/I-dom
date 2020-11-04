@@ -49,10 +49,12 @@ def push_notifications(sender, instance, **kwargs):
                 fcm_token = []
                 for obj in FCMDevice.objects.all():
                     fcm_token.append(obj.registration_id)
+
                 message_title = "W domu pojawil sie dym"
                 message_body = "W domu pojawil sie dym, opusc mieszkanie i wezwij sluzby ratunkowe"
                 result = push_service.notify_multiple_devices(registration_ids=fcm_token, message_title=message_title,
-                                                           message_body=message_body)
+                                                           message_body=message_body, click_action="FLUTTER_NOTIFICATION_CLICK",
+                                                           android_channel_id="flutter.idom/notifications")
                 print(result)
 
             except requests.exceptions.ConnectionError:
