@@ -14,9 +14,9 @@ class VideoCamera(object):
         :param ip:
         """
         # Wersja IP cam telefon
-        self.cam = 'http://' + str(ip) + ':8080' + '/video'
+        #self.cam = 'http://' + str(ip) + ':8080' + '/video'
         # Wersja IP cam ESP
-        #self.cam = 'rtsp://' + str(ip) + '/mjpeg/1'
+        self.cam = 'rtsp://' + str(ip) + '/mjpeg/1'
         self.video = cv2.VideoCapture(self.cam)
 
     def __del__(self):

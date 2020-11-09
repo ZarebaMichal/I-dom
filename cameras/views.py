@@ -31,7 +31,7 @@ def gen(camera):
 
 
 #@permission_classes([IsAuthenticated])
-def ip_cam(pk):
+def ip_cam(request, pk):
     """
     Render video stream from IP camera, find IP address and create
     VideoCamera instance. Return 404 if camera with given id doesn't exist.
