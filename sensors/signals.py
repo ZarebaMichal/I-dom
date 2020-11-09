@@ -40,7 +40,7 @@ def do_something_if_changed(sender, instance, **kwargs):
 @receiver(pre_save, sender=SensorsData)
 def push_notifications(sender, instance, **kwargs):
     try:
-        sensor = SensorsData.objects.get(pk=instance.pk)
+        sensor = Sensors.objects.get(pk=instance.sensor_id)
     except ObjectDoesNotExist:
         pass # Object is new, so field hasn't technically changed, but you may want to do something else here.
     else:
@@ -58,7 +58,7 @@ def push_notifications(sender, instance, **kwargs):
                                                            message_body=message_body, click_action="FLUTTER_NOTIFICATION_CLICK",
                                                            android_channel_id="flutter.idom/notifications")
                 print(result)
-
+### TO JEST DO WYRZUCENIA !!!!!!!!!!
             except requests.exceptions.ConnectionError:
                 print('Service offline')
 
@@ -68,27 +68,34 @@ def push_notifications(sender, instance, **kwargs):
 
 @receiver(pre_save, sender=SensorsData)
 def sms_notifications(sender, instance, **kwargs):
-
-    # Get users with sms notifications turned ON
     try:
-        users = CustomUser.objects.filter(sms_notifications=True)
+        sensor = Sensors.objects.get(pk=instance.sensor_id)
     except ObjectDoesNotExist:
-        return 'No users with notficiations turned ON'
+        pass  # Object is new, so field hasn't technically changed, but you may want to do something else here.
+    else:
 
-    # Conver users objects to list
-    users_list = list(users)
+        if sensor.category == 'smoke' or sensor.category == 'gas':
 
-    # Load Twilio client
-    client = Client(config('TWILIO_ACCOUNT_SID'), config('TWILIO_AUTH_TOKEN'))
+            # Get users with sms notifications turned ON
+            try:
+                users = CustomUser.objects.filter(sms_notifications=True)
+            except ObjectDoesNotExist:
+                return 'No users with notficiations turned ON'
 
-   # Iterate over users to send them SMS
-    for user in users_list:
-        # MySQL keeps empty records as str
-        if type(user.telephone) is not str:
-            message = client.messages \
-                            .create(
-                                body="Wykryto gaz w Twoim mieszkaniu, TEST FROM IDOM",
-                                from_=config('TWILIO_NUMBER'),
-                                to=str(user.telephone)
-                                    )
+            # Conver users objects to list
+            users_list = list(users)
+
+            # Load Twilio client
+            client = Client(config('TWILIO_ACCOUNT_SID'), config('TWILIO_AUTH_TOKEN'))
+
+           # Iterate over users to send them SMS
+            for user in users_list:
+                # MySQL keeps empty records as str
+                if type(user.telephone) is not str:
+                    message = client.messages \
+                                    .create(
+                                        body="Wykryto gaz w Twoim mieszkaniu, TEST FROM IDOM",
+                                        from_=config('TWILIO_NUMBER'),
+                                        to='str(user.telephone)'
+                                            )
 
