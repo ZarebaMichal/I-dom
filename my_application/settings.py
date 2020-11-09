@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'django_rest_passwordreset',
     'sensors',
     'fcm_django',
-    'core',
     'webpack_loader',
     ]
 

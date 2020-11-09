@@ -1,11 +1,13 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from decouple import config
 from requests import Response
 from fcm_django.models import FCMDevice
 from my_application.settings import FCM_SERVER_KEY
 from register.models import CustomUser
 from pyfcm import FCMNotification
+from twilio.rest import Client
 
 from sensors.models import Sensors, SensorsData
 import requests
@@ -62,3 +64,31 @@ def push_notifications(sender, instance, **kwargs):
 
             except requests.exceptions.Timeout:
                 print('Timeout')
+
+
+@receiver(pre_save, sender=SensorsData)
+def sms_notifications(sender, instance, **kwargs):
+
+    # Get users with sms notifications turned ON
+    try:
+        users = CustomUser.objects.filter(sms_notifications=True)
+    except ObjectDoesNotExist:
+        return 'No users with notficiations turned ON'
+
+    # Conver users objects to list
+    users_list = list(users)
+
+    # Load Twilio client
+    client = Client(config('TWILIO_ACCOUNT_SID'), config('TWILIO_AUTH_TOKEN'))
+
+   # Iterate over users to send them SMS
+    for user in users_list:
+        # MySQL keeps empty records as str
+        if type(user.telephone) is not str:
+            message = client.messages \
+                            .create(
+                                body="Wykryto gaz w Twoim mieszkaniu, TEST FROM IDOM",
+                                from_=config('TWILIO_NUMBER'),
+                                to=str(user.telephone)
+                                    )
+
