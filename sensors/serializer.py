@@ -22,6 +22,9 @@ class SensorsSerializer(DynamicSensorsSerializer):
     CATEGORIES = [
         ('temperature', 'temperature'),
         ('humidity', 'humidity'),
+        ('smoke', 'smoke'),
+        ('gas', 'gas'),
+        ('water_temp', 'water_temp'),
     ]
 
     id = serializers.IntegerField(read_only=True)
