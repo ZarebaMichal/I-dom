@@ -41,15 +41,25 @@ INSTALLED_APPS = [
     'crispy_forms',
     #'register.apps.RegisterConfig',
     'register',
+    'cameras',
     'django.contrib.staticfiles',
     'drf_yasg',
     'phonenumber_field',
     'django_rest_passwordreset',
     'sensors',
     'fcm_django',
+    'core',
+    'webpack_loader',
     ]
 
 FCM_SERVER_KEY = "AIzaSyB_iSlgdRl77JXEgUmAu3d1U4xubpni2xY"
+
+WEBPACK_LOADER = {
+    'DEFAULT':{
+        'BUNDLE_DIR_NAME': 'bundles/',
+    'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
+    }
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -85,7 +95,7 @@ ROOT_URLCONF = 'my_application.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'idom-master')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -153,7 +163,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'book-frontend', "build", "static"),  # update the STATICFILES_DIRS
+)
+STATIC_ROOT = os.path.join(BASE_DIR, 'idom-master', 'build', 'static')
 
 # Setting authoriazation for customUser
 AUTH_USER_MODEL = 'register.CustomUser'
