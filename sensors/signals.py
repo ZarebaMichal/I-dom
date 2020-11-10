@@ -8,6 +8,8 @@ from my_application.settings import FCM_SERVER_KEY
 from register.models import CustomUser
 from pyfcm import FCMNotification
 from twilio.rest import Client
+from decouple import config
+
 
 from sensors.models import Sensors, SensorsData
 import requests
@@ -45,25 +47,34 @@ def push_notifications(sender, instance, **kwargs):
         pass # Object is new, so field hasn't technically changed, but you may want to do something else here.
     else:
         if sensor.category == 'smoke':
-            try:
-                push_service = FCMNotification(api_key="AIzaSyB_iSlgdRl77JXEgUmAu3d1U4xubpni2xY")
+            push_service = FCMNotification(api_key=config('FCM_APIKEY'))
 
-                fcm_token = []
-                for obj in FCMDevice.objects.all():
-                    fcm_token.append(obj.registration_id)
+            fcm_token = []
+            for obj in FCMDevice.objects.all():
+                fcm_token.append(obj.registration_id)
 
-                message_title = "W domu pojawil sie dym"
-                message_body = "W domu pojawil sie dym, opusc mieszkanie i wezwij sluzby ratunkowe"
-                result = push_service.notify_multiple_devices(registration_ids=fcm_token, message_title=message_title,
-                                                           message_body=message_body, click_action="FLUTTER_NOTIFICATION_CLICK",
-                                                           android_channel_id="flutter.idom/notifications")
-                print(result)
-### TO JEST DO WYRZUCENIA !!!!!!!!!!
-            except requests.exceptions.ConnectionError:
-                print('Service offline')
+            message_title = "W domu pojawil sie dym"
+            message_body = "W domu pojawil sie dym, opusc mieszkanie i wezwij sluzby ratunkowe"
+            result = push_service.notify_multiple_devices(registration_ids=fcm_token,
+                                                          message_title=message_title,
+                                                          message_body=message_body,
+                                                          click_action="FLUTTER_NOTIFICATION_CLICK",
+                                                          android_channel_id="flutter.idom/notifications")
+            print(result)
+        elif sensor.category == 'gas':
+            push_service = FCMNotification(api_key=config('FCM_APIKEY'))
 
-            except requests.exceptions.Timeout:
-                print('Timeout')
+            fcm_token = []
+            for obj in FCMDevice.objects.all():
+                fcm_token.append(obj.registration_id)
+
+            message_title = "W domu pojawil sie gaz"
+            message_body = "W domu pojawil sie gaz, otworz okna, opusc mieszkanie i wezwij sluzby ratunkowe"
+            result = push_service.notify_multiple_devices(registration_ids=fcm_token, message_title=message_title,
+                                                          message_body=message_body,
+                                                          click_action="FLUTTER_NOTIFICATION_CLICK",
+                                                          android_channel_id="flutter.idom/notifications")
+            print(result)
 
 
 @receiver(pre_save, sender=SensorsData)

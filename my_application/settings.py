@@ -48,10 +48,11 @@ INSTALLED_APPS = [
     'django_rest_passwordreset',
     'sensors',
     'fcm_django',
+    'twilio',
     'webpack_loader',
     ]
 
-FCM_SERVER_KEY = "AIzaSyB_iSlgdRl77JXEgUmAu3d1U4xubpni2xY"
+FCM_SERVER_KEY = config('FCM_APIKEY')
 
 WEBPACK_LOADER = {
     'DEFAULT':{
