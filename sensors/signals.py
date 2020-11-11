@@ -107,6 +107,6 @@ def sms_notifications(sender, instance, **kwargs):
                                     .create(
                                         body="Wykryto gaz w Twoim mieszkaniu, TEST FROM IDOM",
                                         from_=config('TWILIO_NUMBER'),
-                                        to='str(user.telephone)'
+                                        to=str(user.telephone)
                                             )
 
