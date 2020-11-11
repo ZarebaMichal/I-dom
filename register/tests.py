@@ -144,17 +144,17 @@ class CreateUserAPIViewTestCase(APITestCase):
 class UsersListAPIViewTestCase(APITestCase):
 
     def setUp(self):
-        self.username = "testuser"
-        self.email = "test@test.pl"
-        self.password = "test"
-        self.telephone = '+48123456789'
+        self.username = "CheekiBreeki"
+        self.email = "chernobyl@gmail.com"
+        self.password = "ivdamke"
+        self.telephone = '+48999111000'
 
-        self.user = CustomUser.objects.create_user(
+        self.user = CustomUser.objects.create_superuser(
             self.username, self.email, self.password, self.telephone
         )
 
-        self.token = Token.objects.create(user=self.user)
-        self.client = APIClient(HTTP_AUTHORIZATION='Token ' + self.token.key)
+        self.token, self.created = Token.objects.get_or_create(user=self.user)
+        self.client = Client(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
         self.username2 = 'notme'
 
@@ -183,14 +183,28 @@ class UsersListAPIViewTestCase(APITestCase):
 class UserUpdateAPIViewTestCase(APITestCase):
 
     def setUp(self):
-        self.username = "testuser"
-        self.email = "test@test.pl"
-        self.password = "test"
-        self.telephone = '+48123456789'
+        self.username = "CheekiBreeki"
+        self.email = "chernobyl@gmail.com"
+        self.password = "ivdamke"
+        self.telephone = '+48999111000'
 
         self.user = CustomUser.objects.create_user(
             self.username, self.email, self.password, self.telephone
         )
+        self.token = Token.objects.create(user=self.user)
+        self.client = APIClient(HTTP_AUTHORIZATION='Token ' + self.token.key)
+
+        self.username2 = "test2"
+        self.email2 = "test@gmail.com"
+        self.password2 = "test"
+        self.telephone2 = '+48666666666'
+
+        self.user2 = CustomUser.objects.create_superuser(
+            self.username2, self.email2, self.password2, self.telephone2
+        )
+
+        self.token2, self.created2 = Token.objects.get_or_create(user=self.user2)
+        self.client2 = Client(HTTP_AUTHORIZATION='Token ' + self.token2.key)
 
         self.user2_id = 10
 
@@ -230,7 +244,7 @@ class UserUpdateAPIViewTestCase(APITestCase):
         """
         Test to verify if we can update user which doesn't exist
         """
-        response = self.client.put(f'/users/update/{self.user2_id}', self.valid_payload)
+        response = self.client2.put(f'/users/update/{self.user2_id}', self.valid_payload)
         self.assertEqual(404, response.status_code)
 
     def test_only_notifications(self):
@@ -423,7 +437,7 @@ class DeleteUserAPIViewTestCase(APITestCase):
         """
         Test to verify if non-admin user can delete someone's account
         """
-        response = self.client2.delete(f'/users/delete/{self.user2.id}')
+        response = self.client2.delete(f'/users/delete/{self.user.id}')
         self.assertEqual(403, response.status_code)
         self.assertTrue('detail' in json.loads(response.content))
         self.assertEqual(CustomUser.objects.all().count(), 2)

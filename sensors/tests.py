@@ -187,7 +187,7 @@ class UpdateSensorAPIViewTestCase(APITestCase):
 
         self.non_validated_payload = {
             'name': '',
-            'category': 'gas'
+            'category': 'blabla'
         }
 
     def test_update_sensor(self):
