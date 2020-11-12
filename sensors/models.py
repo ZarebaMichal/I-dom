@@ -9,6 +9,7 @@ class Sensors(models.Model):
         ('gas', 'gas'),
         ('smoke', 'smoke'),
         ('water_temp', 'water_temp'),
+        ('breathalyser', 'breathalyser'),
     ]
     id = models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
     name = models.CharField(max_length=30, unique=True)
