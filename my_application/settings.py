@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'fcm_django',
     'twilio',
     'webpack_loader',
+    'driver',
     ]
 
 FCM_SERVER_KEY = config('FCM_APIKEY')
