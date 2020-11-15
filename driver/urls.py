@@ -10,4 +10,5 @@ urlpatterns = [
     path('drivers/update/<int:pk>', views.update_driver),
     path('drivers/delete/<int:pk>', views.delete_driver),
     path('drivers/ip', views.add_driver_ip_address),
+    path('drivers/action', views.send_action),
 ]
