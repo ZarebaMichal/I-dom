@@ -84,9 +84,16 @@ def sms_notifications(sender, instance, **kwargs):
     except ObjectDoesNotExist:
         pass  # Object is new, so field hasn't technically changed, but you may want to do something else here.
     else:
+        if sensor.category == 'smoke':
+            element = 'dym'
+        elif sensor.category == 'gas':
+            element = 'gaz'
+        elif sensor.category == 'rain_sensor':
+            element = 'deszcz'
 
-        if sensor.category == 'smoke' or sensor.category == 'gas':
+        categories = ['smoke', 'gas', 'rain_sensor']
 
+        if sensor.notifications and sensor.category in categories:
             # Get users with sms notifications turned ON
             try:
                 users = CustomUser.objects.filter(sms_notifications=True)
@@ -105,8 +112,7 @@ def sms_notifications(sender, instance, **kwargs):
                 if type(user.telephone) is not str:
                     message = client.messages \
                                     .create(
-                                        body="Wykryto gaz w Twoim mieszkaniu, TEST FROM IDOM",
+                                        body=f"Czujnik {sensor.name} wykryl {element}, TEST FROM IDOM",
                                         from_=config('TWILIO_NUMBER'),
                                         to=str(user.telephone)
                                             )
-
