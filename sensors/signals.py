@@ -50,7 +50,7 @@ def push_notifications(sender, instance, **kwargs):
             push_service = FCMNotification(api_key=config('FCM_APIKEY'))
 
             fcm_token = []
-            for obj in FCMDevice.objects.all():
+            for obj in FCMDevice.objects.filter(active=True):
                 fcm_token.append(obj.registration_id)
 
             message_title = "W domu pojawil sie dym"
@@ -65,7 +65,7 @@ def push_notifications(sender, instance, **kwargs):
             push_service = FCMNotification(api_key=config('FCM_APIKEY'))
 
             fcm_token = []
-            for obj in FCMDevice.objects.all():
+            for obj in FCMDevice.objects.filter(active=True):
                 fcm_token.append(obj.registration_id)
 
             message_title = "W domu pojawil sie gaz"
