@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from djqscsv import render_to_csv_response, write_csv
+
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -9,6 +11,7 @@ import requests
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
 from django.db.models import Prefetch
+#from django_queryset_csv import render_to_csv_response
 
 
 @api_view(['GET'])
@@ -230,3 +233,8 @@ def add_sensor_ip_address(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def csv_view(request):
+    qs = SensorsData.objects.all()
+    return render_to_csv_response(qs, filename='test.csv')
