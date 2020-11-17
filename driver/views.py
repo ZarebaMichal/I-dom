@@ -6,6 +6,7 @@ from driver.models import Drivers
 from driver.serializer import DriversSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
+import requests
 
 
 # <--------- LIST OF DRIVERS ---------> #
@@ -141,3 +142,22 @@ def add_driver_ip_address(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# <--------- SEND ACTION TO DRIVER ---------> #
+
+
+@api_view(['POST'])
+def send_action(request):
+    """
+    Endpoint to send request for action to driver
+    :param request:
+    :return:
+    """
+    try:
+        driver = Drivers.objects.get(name=request.data['name'])
+    except ObjectDoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    result = request.post(f'http://{driver.ip_address}/', data=1)
+    return Response(result)
