@@ -29,11 +29,22 @@ class DriversSerializer(DynamicDriversSerializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(max_length=30, required=False)
     category = serializers.ChoiceField(choices=CATEGORIES, required=False)
-    data = serializers.BooleanField(allow_null=True)
+    data = serializers.BooleanField(required=False)
 
     class Meta:
         model = Drivers
         fields = ['id', 'name', 'category', 'ip_address', 'data']
+
+    @staticmethod
+    def validate_name(value):
+        """
+        Check if driver with provided name exists in database.
+        :param value:
+        :return:
+        """
+        if Drivers.objects.filter(name=value).exists():
+            raise serializers.ValidationError('Driver with provided name already exists')
+        return value
 
     def create(self, validated_data):
         """
@@ -67,13 +78,3 @@ class DriversSerializer(DynamicDriversSerializer):
 
         return instance
 
-    @staticmethod
-    def validate_name(value):
-        """
-        Check if driver with provided name exists in database.
-        :param value:
-        :return:
-        """
-        if Drivers.objects.filter(name=value).exists():
-            raise serializers.ValidationError('Driver with provided name already exists')
-        return value
