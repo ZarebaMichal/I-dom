@@ -7,6 +7,7 @@ from register.serializer import CustomUserSerializer, UpdateCustomUserSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from .permissions import IsUpdateProfile
+from datetime import datetime
 import json
 
 
@@ -87,7 +88,11 @@ def delete_user(request, pk, format=None):
         user = CustomUser.objects.get(pk=pk)
     except CustomUser.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-
+    time = str(datetime.now())
+    time = time.replace(" ", "")
+    user.username = time
+    user.email = time + '@gmail.com'
+    user.telephone = ''
     user.is_active = False
     user.save()
     return Response(status=status.HTTP_200_OK)
