@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from djqscsv import render_to_csv_response, write_csv
+
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -8,7 +10,9 @@ from rest_framework.permissions import IsAuthenticated
 import requests
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
+from datetime import datetime
 from django.db.models import Prefetch
+#from django_queryset_csv import render_to_csv_response
 
 
 @api_view(['GET'])
@@ -99,7 +103,11 @@ def delete_sensor(request, pk, format=None):
         sensor = Sensors.objects.get(pk=pk)
     except Sensors.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-
+    time = str(datetime.now())
+    time = time.replace(" ", "")
+    sensor.name = time
+    sensor.notifications = False
+    sensor.ip_address = None
     sensor.is_active = False
     sensor.save()
     return Response(status=status.HTTP_200_OK)
@@ -230,3 +238,8 @@ def add_sensor_ip_address(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def csv_view(request):
+    qs = SensorsData.objects.all()
+    return render_to_csv_response(qs, filename='test.csv')
