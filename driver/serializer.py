@@ -35,6 +35,17 @@ class DriversSerializer(DynamicDriversSerializer):
         model = Drivers
         fields = ['id', 'name', 'category', 'ip_address', 'data']
 
+    @staticmethod
+    def validate_name(value):
+        """
+        Check if driver with provided name exists in database.
+        :param value:
+        :return:
+        """
+        if Drivers.objects.filter(name=value).exists():
+            raise serializers.ValidationError('Driver with provided name already exists')
+        return value
+
     def create(self, validated_data):
         """
         Create and return new driver instance, given the validated data
@@ -67,13 +78,3 @@ class DriversSerializer(DynamicDriversSerializer):
 
         return instance
 
-    @staticmethod
-    def validate_name(value):
-        """
-        Check if driver with provided name exists in database.
-        :param value:
-        :return:
-        """
-        if Drivers.objects.filter(name=value).exists():
-            raise serializers.ValidationError('Driver with provided name already exists')
-        return value
