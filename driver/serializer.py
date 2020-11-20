@@ -29,7 +29,7 @@ class DriversSerializer(DynamicDriversSerializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(max_length=30, required=False)
     category = serializers.ChoiceField(choices=CATEGORIES, required=False)
-    data = serializers.BooleanField(allow_null=True)
+    data = serializers.BooleanField(required=False)
 
     class Meta:
         model = Drivers

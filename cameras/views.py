@@ -1,3 +1,5 @@
+import cv2
+from django.views.decorators import gzip
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -7,10 +9,10 @@ from . import camera
 from django.http.response import StreamingHttpResponse
 from cameras.models import Cameras
 from cameras.serializer import CamerasSerializer
+from turbojpeg import TurboJPEG
 
 from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ObjectDoesNotExist
-
 from .camera import VideoCamera
 
 
@@ -18,19 +20,24 @@ def index(request):
     return render(request, 'cameras/home.html')
 
 
-def gen(camera):
+def gen_frame(cap):
     """
     Function for rendering camera feed frame by frame.
     :param camera:
     :return:
     """
-    while True:
-        frame = camera.get_frame()
+    jpeg = TurboJPEG()
+    while cap:
+        frame = cap.read()
+        #frame_flip = cv2.flip(frame, 1)
+        #convert = cv2.imencode('.jpg', frame_flip)[1].tobytes()
+        convert = jpeg.encode(frame)
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+               b'Content-Type: image/jpeg\r\n\r\n' + convert + b'\r\n\r\n')
 
 
 #@permission_classes([IsAuthenticated])
+@gzip.gzip_page
 def ip_cam(request, pk):
     """
     Render video stream from IP camera, find IP address and create
@@ -42,7 +49,8 @@ def ip_cam(request, pk):
         camera = Cameras.objects.get(pk=pk)
     except Cameras.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    return StreamingHttpResponse(gen(VideoCamera(camera.ip_address)),
+    cap = VideoCamera(camera.ip_address).start()
+    return StreamingHttpResponse(gen_frame(cap),
                                  content_type='multipart/x-mixed-replace; boundary=frame')
 
 
@@ -97,7 +105,7 @@ def camera_detail(request, pk, format=None):
 
 
 @api_view(['PUT'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def update_camera(request, pk, format=None):
     """
     Update data of camera
@@ -163,3 +171,4 @@ def add_camera_ip_address(request):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
