@@ -47,7 +47,6 @@ class VideoCamera(object):
             (grabbed, frame) = self.video.read()
             self.read_lock.acquire()
             self.grabbed, self.frame = grabbed, frame
-            time.sleep(self.FPS_MS)
             self.read_lock.release()
 
     def read(self):
