@@ -11,6 +11,8 @@ class Sensors(models.Model):
         ('water_temp', 'water_temp'),
         ('breathalyser', 'breathalyser'),
         ('rain_sensor', 'rain_sensor'),
+        ('air_humidity', 'air_humidity'),
+        ('atmo_pressure', 'atmo_pressure'),
     ]
     id = models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
     name = models.CharField(max_length=30, unique=True)
