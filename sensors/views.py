@@ -1,16 +1,19 @@
 from django.shortcuts import render
 from djqscsv import render_to_csv_response, write_csv
-
+from django.db.models import F
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+
+from sensors import models
 from sensors.models import Sensors, SensorsData
 from sensors.serializer import SensorsSerializer, SensorsDataSerializer
 from rest_framework.permissions import IsAuthenticated
 import requests
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
-from datetime import datetime
+from datetime import datetime, timedelta
+from django.utils import timezone
 from django.db.models import Prefetch
 #from django_queryset_csv import render_to_csv_response
 
@@ -245,3 +248,60 @@ def add_sensor_ip_address(request):
 def csv_view(request):
     qs = SensorsData.objects.all()
     return render_to_csv_response(qs, filename='test.csv')
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def data_to_csv(request):
+    """
+    Endpoint for returning csv file with chosen sensor, time and category.
+    There are different DB columns returned, depends on provided data
+    :param request: {
+                        "sensors_ids": list with id of sensor (null if empty),
+                        "categories": list of sensor categories (null if empty),
+                        "days": data in provided days (always required, max 30)
+                    }
+    :return: CSV file "sensors_data" and Http response code 200
+    """
+
+    # User provides only sensor categories
+    if request.data['categories'] is not None:
+        sensors_data = (models.SensorsData
+                        .objects
+                        .select_related('sensor')
+                        .filter(sensor__category__in=request.data['categories'],
+                                delivery_time__gte=datetime.now(tz=timezone.utc)-timedelta(days=int(request.data['days'])))
+                        .values('delivery_time', 'sensor_data').
+                        annotate(sensor_name=F('sensor__name')))
+        return render_to_csv_response(sensors_data, filename='sensor_data.csv')
+
+    # User provides only 1 sensor with time
+    elif request.data['sensors_ids'] is not None and len(request.data['sensors_ids']) == 1:
+        sensors_data = (models.SensorsData
+                        .objects.select_related('sensor')
+                        .filter(sensor__id=request.data['sensors_ids'][0],
+                                delivery_time__gte=datetime.now(tz=timezone.utc)-timedelta(days=int(request.data['days'])))
+                        .values('delivery_time', 'sensor_data'))
+        return render_to_csv_response(sensors_data, filename='sensor_data.csv')
+
+    # User provides more than 1 sensor with time
+    elif request.data['sensors_ids'] is not None and len(request.data['sensors_ids']) > 1:
+        sensors_data = (models.SensorsData
+                        .objects.
+                        select_related('sensor')
+                        .filter(sensor__id__in=request.data['sensors_ids'],
+                                delivery_time__gte=datetime.now(tz=timezone.utc)-timedelta(days=int(request.data['days'])))
+                        .values('delivery_time', 'sensor_data').
+                        annotate(sensor_name=F('sensor__name')))
+        return render_to_csv_response(sensors_data, filename='sensor_data.csv')
+
+    # User request all sensor with all categories in given time
+    elif request.data['sensors_ids'] is None and request.data['categories'] is None:
+        sensors_data = (models.SensorsData
+                        .objects
+                        .select_related('sensor').
+                        filter(delivery_time__gte=datetime.now(tz=timezone.utc)-timedelta(days=int(request.data['days'])))
+                        .values('delivery_time', 'sensor_data').
+                        annotate(sensor_name=F('sensor__name'), sensor_category=F('sensor__category')))
+        return render_to_csv_response(sensors_data, filename='sensor_data.csv')
+
