@@ -22,6 +22,6 @@ urlpatterns = [
     path('sensors_data/frequency/<int:pk>', views.change_frequency_data),
     path('sensors_data/latest_value/<int:pk>', views.get_last_data),
     path('sensors/ip', views.add_sensor_ip_address),
-    path('sensors_data/csv', views.csv_view),
+    path('sensors_data/csv', views.data_to_csv),
     path('', include(router.urls)),
 ]

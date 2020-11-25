@@ -76,7 +76,7 @@ class UserAdmin(BaseUserAdmin):
         ),
     )
 
-    list_display = ('username', 'email', 'telephone', 'is_staff')
+    list_display = ('username', 'email', 'telephone', 'is_staff', 'sms_notifications', 'app_notifications')
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
     search_fields = ('username',)
     filter_horizontal = ('groups', 'user_permissions',)
