@@ -60,7 +60,6 @@ six==1.14.0
 sqlparse==0.3.1
 treq==20.9.0
 twilio==6.47.0
-Twisted @ file:///D:/Twisted-20.3.0-cp38-cp38-win_amd64.whl
 txFCM==0.0.1
 uritemplate==3.0.1
 urllib3==1.25.9

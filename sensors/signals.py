@@ -61,8 +61,8 @@ def push_notifications(sender, instance, **kwargs):
             for obj in FCMDevice.objects.filter(active=True):
                 fcm_token.append(obj.registration_id)
 
-            message_title = f"Czujnik {sensor.name} wykryl {element}"
-            message_body = f"Czujnik {sensor.name} wykryl {element}. Wez to troszeczke pod uwage i uwazaj na siebie!"
+            message_title = f"Czujnik {sensor.name} wykrył {element}"
+            message_body = f"Czujnik {sensor.name} wykrył {element}. Uważaj na siebie!"
             result = push_service.notify_multiple_devices(registration_ids=fcm_token,
                                                           message_title=message_title,
                                                           message_body=message_body,
