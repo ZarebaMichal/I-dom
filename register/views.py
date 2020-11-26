@@ -56,6 +56,24 @@ def user_detail(request, username, format=None):
         return Response(serializer.data)
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated & IsUpdateProfile | IsAdminUser])
+def user_detail_pk(request, pk, format=None):
+    """
+    Retrieve data of user. Search in db by his primary key.
+    If user doesn't exist return 404,
+    if given invalid data, return 400, else if succeeded return 200
+    """
+    try:
+        user = CustomUser.objects.get(pk=pk)
+    except CustomUser.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = CustomUserSerializer(user)
+        return Response(serializer.data)
+
+
 @swagger_auto_schema(methods=["put"], request_body=UpdateCustomUserSerializer())
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated & IsUpdateProfile | IsAdminUser])
