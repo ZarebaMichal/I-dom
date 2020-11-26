@@ -7,6 +7,7 @@ from driver.serializer import DriversSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
 import requests
+from urllib3 import exceptions
 
 
 # <--------- LIST OF DRIVERS ---------> #
@@ -159,5 +160,11 @@ def send_action(request):
     except ObjectDoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    result = requests.post(f'http://{driver.ip_address}/', data=1)
+    try:
+        result = requests.post(f'http://{driver.ip_address}/', data=1)
+        result.raise_for_status()
+    except exceptions.NewConnectionError:
+        print('Service offline')
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
     return Response(result)
