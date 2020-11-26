@@ -250,7 +250,7 @@ def csv_view(request):
     return render_to_csv_response(qs, filename='test.csv')
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def data_to_csv(request):
     """
