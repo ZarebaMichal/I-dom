@@ -159,5 +159,5 @@ def send_action(request):
     except ObjectDoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    result = request.post(f'http://{driver.ip_address}/', data=1)
+    result = requests.post(f'http://{driver.ip_address}/', data=1)
     return Response(result)
