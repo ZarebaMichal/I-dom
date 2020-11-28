@@ -10,6 +10,7 @@ from django.http.response import StreamingHttpResponse
 from cameras.models import Cameras
 from cameras.serializer import CamerasSerializer
 from turbojpeg import TurboJPEG
+from datetime import datetime
 
 from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ObjectDoesNotExist
@@ -131,7 +132,8 @@ def update_camera(request, pk, format=None):
 @permission_classes([IsAuthenticated])
 def delete_camera(request, pk, format=None):
     """
-        Delete camera
+        Delete camera, change name of the camera to time when deleted,
+        change ip address to none and notifications, is active flag to false
         :param request: DELETE
         :param pk: id of camera
         :return: If camera doesn't exist return 404,
@@ -143,6 +145,11 @@ def delete_camera(request, pk, format=None):
     except Cameras.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+    time = str(datetime.now())
+    time = time.replace(" ", "")
+    camera.name = time
+    camera.ip_address = None
+    camera.notifications = False
     camera.is_active = False
     camera.save()
     return Response(status=status.HTTP_200_OK)
@@ -171,4 +178,3 @@ def add_camera_ip_address(request):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     return Response(serializer.data, status=status.HTTP_200_OK)
-
