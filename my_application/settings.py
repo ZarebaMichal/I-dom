@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'webpack_loader',
     'driver',
     'djqscsv',
+    'actions',
     ]
 
 FCM_SERVER_KEY = config('FCM_APIKEY')

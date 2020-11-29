@@ -50,6 +50,7 @@ urlpatterns = [
     path('', include('sensors.urls')),
     path('', include('cameras.urls')),
     path('', include('driver.urls')),
+    path('', include('actions.urls')),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api-token-auth/', decorated_obtain_token_view, name='api_token_auth'),
     path('password-reset/', include('django_rest_passwordreset.urls', namespace='password_reset'))
