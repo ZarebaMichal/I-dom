@@ -6,7 +6,6 @@ from driver.models import Drivers
 from driver.serializer import DriversSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
-from datetime import datetime
 import requests
 from urllib3 import exceptions
 
@@ -100,8 +99,7 @@ def update_driver(request, pk):
 @permission_classes([IsAuthenticated])
 def delete_driver(request, pk):
     """
-        Delete driver. Change his name for time of deleting,
-        remove IP address and set is_active to false.
+        Delete driver
         :param request: DELETE
         :param pk: id of driver
         :return: If driver doesn't exist return 404,
@@ -113,11 +111,6 @@ def delete_driver(request, pk):
     except Drivers.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    time = str(datetime.now())
-    time = time.replace(" ", "")
-
-    driver.name = time
-    driver.ip_address = None
     driver.is_active = False
     driver.save()
     return Response(status=status.HTTP_200_OK)
@@ -171,7 +164,6 @@ def send_action(request):
         result = requests.post(f'http://{driver.ip_address}/', data=1)
         result.raise_for_status()
     except exceptions.NewConnectionError:
-        print('Service offline')
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
     return Response(result)
