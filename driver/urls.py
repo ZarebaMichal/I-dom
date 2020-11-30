@@ -11,4 +11,8 @@ urlpatterns = [
     path('drivers/delete/<int:pk>', views.delete_driver),
     path('drivers/ip', views.add_driver_ip_address),
     path('drivers/action', views.send_action),
+    path('bulbs/ip/<int:pk>', views.add_bulb_ip),
+    path('bulbs/switch/<int:pk>', views.turn_bulb),
+    path('bulbs/color/<int:pk>', views.bulb_color),
+    path('bulbs/brightness/<int:pk>', views.bulb_brightness),
 ]

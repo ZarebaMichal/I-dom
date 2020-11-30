@@ -1,3 +1,4 @@
+from django.utils.datastructures import MultiValueDictKeyError
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -6,6 +7,8 @@ from driver.models import Drivers
 from driver.serializer import DriversSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
+from yeelight import *
+from datetime import datetime
 import requests
 from urllib3 import exceptions
 
@@ -99,7 +102,8 @@ def update_driver(request, pk):
 @permission_classes([IsAuthenticated])
 def delete_driver(request, pk):
     """
-        Delete driver
+        Delete driver. Change his name for time of deleting,
+        remove IP address and set is_active to false.
         :param request: DELETE
         :param pk: id of driver
         :return: If driver doesn't exist return 404,
@@ -111,6 +115,11 @@ def delete_driver(request, pk):
     except Drivers.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+    time = str(datetime.now())
+    time = time.replace(" ", "")
+
+    driver.name = time
+    driver.ip_address = None
     driver.is_active = False
     driver.save()
     return Response(status=status.HTTP_200_OK)
@@ -167,3 +176,174 @@ def send_action(request):
         return Response(status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
     return Response(result)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_bulb_ip(request, pk):
+    """
+    Add bulb IP address to database. Requires for user to have bulb turned on.
+    :param request:
+                    ip_address : IP ADDRESS of bulb
+    :return:
+            503 if bulb is turned off
+            400 if incorrect ip address
+            200 if ok
+    """
+    try:
+        driver = Drivers.objects.get(pk=pk)
+    except ObjectDoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        bulb = Bulb(driver.ip_address)
+    except BulbException:
+        return Response('Could not connect to the bulb', status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+    driver.data = True
+    driver.save()
+    serializer = DriversSerializer(driver, data=request.data['ip_address'])
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def turn_bulb(request, pk):
+    """
+    Turning on/off bulb. Create instance of bulb and control it
+    :param request:
+                    flag: str value 'on'/'off'
+
+    :param pk:  int value, primary key of driver id (bulb)
+
+    :return: HTTP 404, if driver doesn't exists,
+             HTTP 400, if invalid 'flag' key,
+             HTTP 400, if driver is not a bulb,
+             HTTP 400, if key is not 'flag'
+             HTTP 503, if cannot connect to a bulb,
+             HTTP 200, if done correctly.
+    """
+
+    try:
+        driver = Drivers.objects.get(pk=pk)
+    except ObjectDoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if driver.category != 'bulb':
+        return Response('This driver is not a bulb!', status=status.HTTP_400_BAD_REQUEST)
+    try:
+        bulb = Bulb(driver.ip_address)
+    except BulbException:
+        return Response('Could not connect to the bulb', status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+    try:
+        if request.data['flag'] == 'on':
+            bulb.turn_on()
+            driver.data = True
+            driver.save()
+        elif request.data['flag'] == 'off':
+            bulb.turn_off()
+            driver.data = False
+            driver.save()
+        else:
+            return Response('You need to pass on/off value', status=status.HTTP_400_BAD_REQUEST)
+    except MultiValueDictKeyError:
+        return Response('You need to provide flag as a key', status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bulb_color(request, pk):
+    """
+    Changing color of bulb. Create instance of bulb, and set RGB color
+    :param request:
+                    red: int value between 0-255,
+                    green: int value between 0-255,
+                    blue: int value between 0-255,
+
+    :param pk: int value,  primary key of driver id (bulb)
+
+    :return: HTTP 404, if driver not found,
+             HTTP 400, if driver category is not bulb,
+             HTTP 503, if cannot connect to bulb,
+             HTTP 400, if incorrect RGB values,
+             HTTP 400, if values are not integers,
+             HTTP 400, if 'red', 'green', 'blue' is not key,
+             HTTP 200, if done correctly,
+    """
+
+    try:
+        driver = Drivers.objects.get(pk=pk)
+    except ObjectDoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if driver.category != 'bulb':
+        return Response('This driver is not a bulb!', status=status.HTTP_400_BAD_REQUEST)
+    try:
+        bulb = Bulb(driver.ip_address)
+    except BulbException:
+        return Response('Could not connect to the bulb', status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+    try:
+        red, green, blue = int(request.data['red']), int(request.data['green']), int(request.data['blue'])
+    except ValueError:
+        return Response('Values should be integers', status=status.HTTP_400_BAD_REQUEST)
+    except MultiValueDictKeyError:
+        return Response('You need to provide red, green, blue as a key', status=status.HTTP_400_BAD_REQUEST)
+
+    if (red, green, blue) < (0, 0, 0) or (red, green, blue) > (255, 255, 255):
+        return Response('Incorrect RGB values', status=status.HTTP_400_BAD_REQUEST)
+    else:
+        bulb.set_rgb(red, green, blue)
+        return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bulb_brightness(request, pk):
+    """
+    Changing brightness of bulb.
+    :param request:
+                    brightness: int value between 0-100
+
+    :param pk:  int value of driver primary key
+
+    :return: HTTP 200, if done correctly,
+             HTTP 404, if driver not found,
+             HTTP 400, if driver category is not bulb,
+             HTTP 400, if brightness is not integer,
+             HTTP 400, if brightness not in range (0, 100),
+             HTTP 400, if 'brightness' is not a key,
+             HTTP 503, if cannot connect to bulb,
+    """
+
+    try:
+        driver = Drivers.objects.get(pk=pk)
+    except ObjectDoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if driver.category != 'bulb':
+        return Response('This driver is not a bulb!', status=status.HTTP_400_BAD_REQUEST)
+    try:
+        bulb = Bulb(driver.ip_address)
+    except BulbException:
+        return Response('Could not connect to the bulb', status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+    try:
+        brightness = int(request.data['brightness'])
+    except ValueError:
+        return Response('Value should be integer', status=status.HTTP_400_BAD_REQUEST)
+    except MultiValueDictKeyError:
+        return Response('You need to provide brightness as a key', status=status.HTTP_400_BAD_REQUEST)
+
+    if 0 <= brightness <= 100:
+        bulb.set_brightness(brightness)
+        return Response(status=status.HTTP_200_OK)
+    else:
+        return Response('Brightness should be between 0-100', status=status.HTTP_400_BAD_REQUEST)
