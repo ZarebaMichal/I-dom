@@ -1,4 +1,3 @@
-from django.utils.datastructures import MultiValueDictKeyError
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -173,8 +172,7 @@ def send_action(request):
         result = requests.post(f'http://{driver.ip_address}/', data=1)
         result.raise_for_status()
     except exceptions.NewConnectionError:
-        print('Service offline')
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
     return Response(result)
 
