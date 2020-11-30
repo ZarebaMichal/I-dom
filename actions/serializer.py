@@ -89,6 +89,8 @@ class ActionsSerializer(DynamicActionsSerializer):
         """
         instance.name = validated_data.get('name', instance.name)
         instance.sensor = validated_data.get('sensor', instance.sensor)
+        instance.trigger = validated_data.get('trigger', instance.trigger)
+        instance.operator = validated_data.get('operator', instance.operator)
         instance.driver = validated_data.get('driver', instance.driver)
         instance.days = validated_data.get('days', instance.days)
         instance.start_event = validated_data.get('start_event', instance.start_event)

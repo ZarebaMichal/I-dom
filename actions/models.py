@@ -20,18 +20,6 @@ class Actions(models.Model):
     action = models.CharField(max_length=50)
     flag = models.IntegerField()
 
-    def set_days(self, x):
-        self.days = json.dumps(x)
-
-    def get_days(self):
-        return json.loads(self.days)
-
-    def set_action(self, x):
-        self.action = json.dumps(x)
-
-    def get_action(self):
-        return json.loads(self.action)
-
     class Meta:
         verbose_name = "Action"
         verbose_name_plural = "Actions"
