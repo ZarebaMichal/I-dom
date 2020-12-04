@@ -29,7 +29,10 @@ def gen_frame(cap):
     """
     jpeg = TurboJPEG()
     while cap:
-        frame = cap.read()
+        try:
+            frame = cap.read()
+        except AttributeError:
+            return Response("Webcam services offline", status=status.HTTP_503_SERVICE_UNAVAILABLE)
         #frame_flip = cv2.flip(frame, 1)
         #convert = cv2.imencode('.jpg', frame_flip)[1].tobytes()
         convert = jpeg.encode(frame)
