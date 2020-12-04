@@ -244,18 +244,26 @@ class BulbDriverIPAPIViewTestCase(APITestCase):
         self.driver = Drivers.objects.create(name=self.name, category=self.category)
         self.name2 = 'pilot'
         self.category2 = 'pilot'
-        self.driver2 = Drivers.object.create(name=self.name2, category=self.category2)
+        self.driver2 = Drivers.objects.create(name=self.name2, category=self.category2)
+
+
+        self.ip_correct = {
+            'ip_address': '192.168.18.32'
+        }
+        self.ip_incorrect = {
+            'ip_address': '192.168.1.7'
+        }
 
     def test_add_not_exisiting_bulb_ip(self):
-        response = self.client.post('/bulbs/ip/100', '192.168.1.100')
+        response = self.client.post('/bulbs/ip/100', self.ip_incorrect)
         self.assertEqual(404, response.status_code)
 
     def test_add_existing_bulb_ip(self):
-        response = self.client.post(f'/bulbs/ip/{self.driver.id}', '192.168.18.32')
+        response = self.client.post(f'/bulbs/ip/{self.driver.id}', self.ip_correct)
         self.assertEqual(200, response.status_code)
 
     def test_add_turned_of_bulb_ip(self):
-        response = self.client.post(f'/bulbs/ip/{self.driver2.id}', '192.168.18.15')
+        response = self.client.post(f'/bulbs/ip/{self.driver2.id}', self.ip_incorrect)
         self.assertEqual(503, response.status_code)
 
     def test_add_invalid_ip(self):
@@ -281,9 +289,16 @@ class BulbDriverTurnAPIViewTestCase(APITestCase):
         self.driver = Drivers.objects.create(name=self.name, category=self.category)
         self.name2 = 'pilot'
         self.category2 = 'pilot'
-        self.driver2 = Drivers.object.create(name=self.name2, category=self.category2)
+        self.driver2 = Drivers.objects.create(name=self.name2, category=self.category2)
 
-        self.client.post(f'/bulbs/ip/{self.driver.id}', '192.168.18.30')
+        self.ip_correct = {
+            'ip_address': '192.168.18.32'
+        }
+        self.ip_incorrect = {
+            'ip_address': '192.168.1.7'
+        }
+
+        self.client.post(f'/bulbs/ip/{self.driver.id}', self.ip_incorrect)
 
         self.request_on = {
             'flag': 'on'
@@ -301,6 +316,7 @@ class BulbDriverTurnAPIViewTestCase(APITestCase):
             'dadsa': 'on'
         }
 
+
     def test_turn_turn_on_not_exisiting_bulb(self):
         response = self.client.post(f'/bulbs/switch/300', self.request_on)
         self.assertEqual(404, response.status_code)
@@ -314,22 +330,22 @@ class BulbDriverTurnAPIViewTestCase(APITestCase):
         self.assertEqual(503, response.status_code)
 
     def test_turn_invalid_value(self):
-        self.client.post(f'/bulbs/ip/{self.driver.id}', '192.168.18.32')
+        self.client.post(f'/bulbs/ip/{self.driver.id}', self.ip_correct)
         response = self.client.post(f'/bulbs/switch/{self.driver.id}', self.request_invalid_value)
         self.assertEqual(400, response.status_code)
 
     def test_turn_invalid_key(self):
-        self.client.post(f'/bulbs/ip/{self.driver.id}', '192.168.18.32')
+        self.client.post(f'/bulbs/ip/{self.driver.id}', self.ip_correct)
         response = self.client.post(f'/bulbs/switch/{self.driver.id}', self.request_invalid_key)
         self.assertEqual(400, response.status_code)
 
     def test_ok_on(self):
-        self.client.post(f'/bulbs/ip/{self.driver.id}', '192.168.18.32')
+        self.client.post(f'/bulbs/ip/{self.driver.id}', self.ip_correct)
         response = self.client.post(f'/bulbs/switch/{self.driver.id}', self.request_on)
         self.assertEqual(200, response.status_code)
 
     def test_ok_off(self):
-        self.client.post(f'/bulbs/ip/{self.driver.id}', '192.168.18.32')
+        self.client.post(f'/bulbs/ip/{self.driver.id}', self.ip_correct)
         response = self.client.post(f'/bulbs/switch/{self.driver.id}', self.request_off)
         self.assertEqual(200, response.status_code)
 
@@ -352,9 +368,16 @@ class BulbDriverColorAPIViewTestCase(APITestCase):
         self.driver = Drivers.objects.create(name=self.name, category=self.category)
         self.name2 = 'pilot'
         self.category2 = 'pilot'
-        self.driver2 = Drivers.object.create(name=self.name2, category=self.category2)
+        self.driver2 = Drivers.objects.create(name=self.name2, category=self.category2)
 
-        self.client.post(f'/bulbs/ip/{self.driver.id}', '192.168.18.30')
+        self.ip_correct = {
+            'ip_address': '192.168.18.32'
+        }
+        self.ip_incorrect = {
+            'ip_address': '192.168.1.7'
+        }
+
+        self.client.post(f'/bulbs/ip/{self.driver.id}', self.ip_incorrect)
 
         self.request_valid = {
             'red': 255,
@@ -388,17 +411,17 @@ class BulbDriverColorAPIViewTestCase(APITestCase):
         self.assertEqual(503, response.status_code)
 
     def test_invalid_values(self):
-        self.client.post(f'/bulbs/ip/{self.driver.id}', '192.168.18.32')
+        self.client.post(f'/bulbs/ip/{self.driver.id}', self.ip_correct)
         response = self.client.post(f'/bulbs/color/{self.driver.id}', self.request_invalid_colors)
         self.assertEqual(400, response.status_code)
 
     def test_invalid_keys(self):
-        self.client.post(f'/bulbs/ip/{self.driver.id}', '192.168.18.32')
+        self.client.post(f'/bulbs/ip/{self.driver.id}', self.ip_correct)
         response = self.client.post(f'/bulbs/color/{self.driver.id}', self.request_invalid_keys)
         self.assertEqual(400, response.status_code)
 
     def test_ok(self):
-        self.client.post(f'/bulbs/ip/{self.driver.id}', '192.168.18.32')
+        self.client.post(f'/bulbs/ip/{self.driver.id}', self.ip_correct)
         response = self.client.post(f'/bulbs/color/{self.driver.id}', self.request_valid)
         self.assertEqual(200, response.status_code)
 
@@ -421,9 +444,16 @@ class BulbDriverBrightnessAPIViewTestCase(APITestCase):
         self.driver = Drivers.objects.create(name=self.name, category=self.category)
         self.name2 = 'pilot'
         self.category2 = 'pilot'
-        self.driver2 = Drivers.object.create(name=self.name2, category=self.category2)
+        self.driver2 = Drivers.objects.create(name=self.name2, category=self.category2)
 
-        self.client.post(f'/bulbs/ip/{self.driver.id}', '192.168.18.30')
+        self.ip_correct = {
+            'ip_address': '192.168.18.32'
+        }
+        self.ip_incorrect = {
+            'ip_address': '192.168.1.7'
+        }
+
+        self.client.post(f'/bulbs/ip/{self.driver.id}', self.ip_incorrect)
 
         self.request_valid = {
             'brightness': 65
@@ -446,20 +476,20 @@ class BulbDriverBrightnessAPIViewTestCase(APITestCase):
         self.assertEqual(400, response.status_code)
 
     def test_off_poweeer_bulb(self):
-        response = self.client.post(f'/bulbs/brightnes/{self.driver.id}', self.request_valid)
+        response = self.client.post(f'/bulbs/brightness/{self.driver.id}', self.request_valid)
         self.assertEqual(503, response.status_code)
 
     def test_invalid_value(self):
-        self.client.post(f'/bulbs/ip/{self.driver.id}', '192.168.18.32')
-        response = self.client.post(f'/bulbs/brightnes/{self.driver.id}', self.request_invalid_value)
+        self.client.post(f'/bulbs/ip/{self.driver.id}', self.ip_correct)
+        response = self.client.post(f'/bulbs/brightness/{self.driver.id}', self.request_invalid_value)
         self.assertEqual(400, response.status_code)
 
     def test_invalid_key(self):
-        self.client.post(f'/bulbs/ip/{self.driver.id}', '192.168.18.32')
-        response = self.client.post(f'/bulbs/brightnes/{self.driver.id}', self.request_invalid_key)
+        self.client.post(f'/bulbs/ip/{self.driver.id}', self.ip_correct)
+        response = self.client.post(f'/bulbs/brightness/{self.driver.id}', self.request_invalid_key)
         self.assertEqual(400, response.status_code)
 
     def test_correct(self):
-        self.client.post(f'/bulbs/ip/{self.driver.id}', '192.168.18.32')
-        response = self.client.post(f'/bulbs/brightnes/{self.driver.id}', self.request_valid)
+        self.client.post(f'/bulbs/ip/{self.driver.id}', self.ip_correct)
+        response = self.client.post(f'/bulbs/brightness/{self.driver.id}', self.request_valid)
         self.assertEqual(200, response.status_code)
