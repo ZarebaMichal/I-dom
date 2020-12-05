@@ -1,17 +1,14 @@
-import cv2
 from django.views.decorators import gzip
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.shortcuts import render
-from . import camera
-from django.http.response import StreamingHttpResponse
+from django.http.response import StreamingHttpResponse, HttpResponse
 from cameras.models import Cameras
 from cameras.serializer import CamerasSerializer
 from turbojpeg import TurboJPEG
 from datetime import datetime
-
 from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ObjectDoesNotExist
 from .camera import VideoCamera
@@ -24,38 +21,39 @@ def index(request):
 def gen_frame(cap):
     """
     Function for rendering camera feed frame by frame.
-    :param camera:
+    :param cap:
     :return:
     """
     jpeg = TurboJPEG()
     while cap:
-        try:
-            frame = cap.read()
-        except AttributeError:
-            return Response("Webcam services offline", status=status.HTTP_503_SERVICE_UNAVAILABLE)
-        #frame_flip = cv2.flip(frame, 1)
-        #convert = cv2.imencode('.jpg', frame_flip)[1].tobytes()
+        frame = cap.read()
         convert = jpeg.encode(frame)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + convert + b'\r\n\r\n')
 
 
-#@permission_classes([IsAuthenticated])
 @gzip.gzip_page
 def ip_cam(request, pk):
     """
     Render video stream from IP camera, find IP address and create
     VideoCamera instance. Return 404 if camera with given id doesn't exist.
-    :param pk: id of IP camera in database
+    :param pk: id of IP camera in database. Check if connected to camera
+    if not return 503 status response
     :return:
     """
     try:
         camera = Cameras.objects.get(pk=pk)
     except Cameras.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    cap = VideoCamera(camera.ip_address).start()
-    return StreamingHttpResponse(gen_frame(cap),
-                                 content_type='multipart/x-mixed-replace; boundary=frame')
+    cap = VideoCamera(ip=camera.ip_address)
+
+    # DevNote: Ask frontend to create 503/500/404 html file
+    if cap is None:
+        return HttpResponse(status=503)
+    else:
+        cap.start()
+        return StreamingHttpResponse(gen_frame(cap),
+                                     content_type='multipart/x-mixed-replace; boundary=frame')
 
 
 @api_view(['GET'])

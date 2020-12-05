@@ -1,16 +1,33 @@
 
 import threading
-import cv2,os, urllib.request
-import time
-import numpy as np
-#from threading import Thread, Lock
-from django.conf import settings
-
+import cv2
 
 class VideoCamera(object):
     """
     Class to handle IP cameras with opencv
     """
+    def __new__(cls, *args, **kwargs):
+        """
+        Overwrite __new__ method to check if we opencv can connect to camera,
+        if failed return None, else come to __init__
+        :param args:
+        :param kwargs:
+        """
+        obj = super(VideoCamera,cls).__new__(cls)
+        obj._from_base_class = type(obj) == VideoCamera
+        try:
+            cam = 'http://' + str(kwargs['ip']) + ':8080' + '/video'
+            print(cam)
+            video = cv2.VideoCapture(cam)
+            if not video.isOpened() or video is None:
+                return
+        except cv2.error as e:
+            print("cv2.error:", e)
+        except Exception as e:
+            print("Exception:", e)
+
+        return obj
+
     def __init__(self, ip):
         """
         Init the camera with provided IP address, /mjpeg stands for url address,
@@ -22,6 +39,8 @@ class VideoCamera(object):
         # Wersja IP cam ESP
         #self.cam = 'rtsp://' + str(ip) + ':8554/mjpeg/1'
         self.video = cv2.VideoCapture(self.cam)
+
+        # Parameters of stream, buffer
         self.W, self.H = 640, 480
         self.video.set(cv2.CAP_PROP_FRAME_WIDTH, self.W)
         self.video.set(cv2.CAP_PROP_FRAME_HEIGHT, self.H)
@@ -31,6 +50,7 @@ class VideoCamera(object):
         # X = Desired FPS
         # self.FPS = 1/60
         # self.FPS_MS = int(self.FPS * 1000)
+
         (self.grabbed, self.frame) = self.video.read()
         self.started = False
         self.read_lock = threading.Lock()
@@ -75,15 +95,3 @@ class VideoCamera(object):
 
     def __del__(self):
         print('deleted')
-
-
-    # def get_frame(self):
-    #     """
-    #     Process frames from camera and covert it to bytes frame by frame"
-    #     :return:
-    #     """
-    #     success, image = self.video.read()
-    #     frame_flip = cv2.flip(image, 1)
-    #     ret, jpeg = cv2.imencode('.jpg', frame_flip)
-    #     return jpeg.tobytes()
-
