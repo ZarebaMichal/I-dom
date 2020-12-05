@@ -27,6 +27,8 @@ def gen_frame(cap):
     jpeg = TurboJPEG()
     while cap:
         frame = cap.read()
+        if frame is None:
+            return HttpResponse(status=503)
         convert = jpeg.encode(frame)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + convert + b'\r\n\r\n')

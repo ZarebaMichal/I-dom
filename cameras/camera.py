@@ -1,6 +1,7 @@
-
 import threading
+import time
 import cv2
+
 
 class VideoCamera(object):
     """
@@ -17,7 +18,6 @@ class VideoCamera(object):
         obj._from_base_class = type(obj) == VideoCamera
         try:
             cam = 'http://' + str(kwargs['ip']) + ':8080' + '/video'
-            print(cam)
             video = cv2.VideoCapture(cam)
             if not video.isOpened() or video is None:
                 return
@@ -48,8 +48,8 @@ class VideoCamera(object):
         self.video.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         # FPS = 1 / X
         # X = Desired FPS
-        # self.FPS = 1/60
-        # self.FPS_MS = int(self.FPS * 1000)
+        self.FPS = 1/30
+        self.FPS_MS = int(self.FPS * 1000)
 
         (self.grabbed, self.frame) = self.video.read()
         self.started = False
@@ -74,15 +74,19 @@ class VideoCamera(object):
                 self.grabbed, self.frame = grabbed, frame
                 self.read_lock.release()
                 self.counter -= 1
+                time.sleep(self.FPS)
             else:
                 return self.__exit__()
 
     def read(self):
         self.read_lock.acquire()
+        if self.frame is None:
+            return self.__exit__()
         frame = self.frame.copy()
         self.read_lock.release()
         self.counter += 1
         self.counter_old = self.counter
+        time.sleep(self.FPS)
         return frame
 
     def stop(self):
