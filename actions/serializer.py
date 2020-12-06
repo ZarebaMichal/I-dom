@@ -61,11 +61,6 @@ class ActionsSerializer(DynamicActionsSerializer):
         :return: new action instance
         """
 
-        if not validated_data.get('name') or not validated_data.get('driver') or not validated_data.get('days')\
-                or not validated_data.get('start_event') or not validated_data.get('action')\
-                or not validated_data.get('flag'):
-            raise serializers.ValidationError('You need to provide name, days, start_event, action and flag of action')
-
         action = Actions.objects.create(name=validated_data.get('name'),
                                         sensor=validated_data.get('sensor'),
                                         trigger=validated_data.get('trigger'),

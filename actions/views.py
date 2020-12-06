@@ -1,3 +1,4 @@
+from datetime import datetime
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -46,7 +47,7 @@ def action_detail(request, pk):
 
 @swagger_auto_schema(methods=["post"], request_body=ActionsSerializer())
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+#@permission_classes([IsAuthenticated])
 def add_action(request):
     """
     Add new action, only for authenticated users
@@ -72,7 +73,7 @@ def add_action(request):
 
 
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+#@permission_classes([IsAuthenticated])
 def update_action(request, pk):
     """
     Update data of action
@@ -112,7 +113,9 @@ def delete_action(request, pk):
         action = Actions.objects.get(pk=pk)
     except Actions.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-
+    time = str(datetime.now())
+    time = time.replace(" ", "")
+    action.name = time
     action.is_active = False
     action.save()
     return Response(status=status.HTTP_200_OK)

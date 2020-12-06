@@ -238,10 +238,7 @@ class UpdateActionAPIViewTestCase(APITestCase):
                                                   action=self.action, flag=self.flag)
 
         self.validated_payload = {
-            "sensor": "",
-            "trigger": "",
-            "operator": "",
-            "flag": 1
+            "end_event": "14:00",
         }
 
         self.non_validated_payload = {
