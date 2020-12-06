@@ -7,7 +7,8 @@ from driver.models import Drivers
 from driver.serializer import DriversSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
-from yeelight import *
+from yeelight import Bulb
+from yeelight import BulbException
 from datetime import datetime
 import requests
 from urllib3 import exceptions
@@ -195,8 +196,10 @@ def add_bulb_ip(request, pk):
     except ObjectDoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+    bulb = Bulb(driver.ip_address)
+
     try:
-        bulb = Bulb(driver.ip_address)
+        bulb.get_properties()
     except BulbException:
         return Response('Could not connect to the bulb', status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
@@ -235,10 +238,8 @@ def turn_bulb(request, pk):
 
     if driver.category != 'bulb':
         return Response('This driver is not a bulb!', status=status.HTTP_400_BAD_REQUEST)
-    try:
-        bulb = Bulb(driver.ip_address)
-    except BulbException:
-        return Response('Could not connect to the bulb', status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+    bulb = Bulb(driver.ip_address)
 
     try:
         if request.data['flag'] == 'on':
@@ -253,6 +254,8 @@ def turn_bulb(request, pk):
             return Response('You need to pass on/off value', status=status.HTTP_400_BAD_REQUEST)
     except MultiValueDictKeyError:
         return Response('You need to provide flag as a key', status=status.HTTP_400_BAD_REQUEST)
+    except BulbException:
+        return Response('Could not connect to the bulb', status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
     return Response(status=status.HTTP_200_OK)
 
@@ -285,10 +288,8 @@ def bulb_color(request, pk):
 
     if driver.category != 'bulb':
         return Response('This driver is not a bulb!', status=status.HTTP_400_BAD_REQUEST)
-    try:
-        bulb = Bulb(driver.ip_address)
-    except BulbException:
-        return Response('Could not connect to the bulb', status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+    bulb = Bulb(driver.ip_address)
 
     try:
         red, green, blue = int(request.data['red']), int(request.data['green']), int(request.data['blue'])
@@ -300,7 +301,10 @@ def bulb_color(request, pk):
     if (red, green, blue) < (0, 0, 0) or (red, green, blue) > (255, 255, 255):
         return Response('Incorrect RGB values', status=status.HTTP_400_BAD_REQUEST)
     else:
-        bulb.set_rgb(red, green, blue)
+        try:
+            bulb.set_rgb(red, green, blue)
+        except BulbException:
+            return Response('Could not connect to the bulb', status=status.HTTP_503_SERVICE_UNAVAILABLE)
         return Response(status=status.HTTP_200_OK)
 
 
@@ -330,10 +334,8 @@ def bulb_brightness(request, pk):
 
     if driver.category != 'bulb':
         return Response('This driver is not a bulb!', status=status.HTTP_400_BAD_REQUEST)
-    try:
-        bulb = Bulb(driver.ip_address)
-    except BulbException:
-        return Response('Could not connect to the bulb', status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+    bulb = Bulb(driver.ip_address)
 
     try:
         brightness = int(request.data['brightness'])
@@ -343,7 +345,10 @@ def bulb_brightness(request, pk):
         return Response('You need to provide brightness as a key', status=status.HTTP_400_BAD_REQUEST)
 
     if 0 <= brightness <= 100:
-        bulb.set_brightness(brightness)
+        try:
+            bulb.set_brightness(brightness)
+        except BulbException:
+            return Response('Could not connect to the bulb', status=status.HTTP_503_SERVICE_UNAVAILABLE)
         return Response(status=status.HTTP_200_OK)
     else:
         return Response('Brightness should be between 0-100', status=status.HTTP_400_BAD_REQUEST)
