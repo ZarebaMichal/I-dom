@@ -201,6 +201,8 @@ def add_bulb_ip(request, pk):
     try:
         bulb.get_properties()
     except BulbException:
+        driver.data = False
+        driver.save()
         return Response('Could not connect to the bulb', status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
     driver.data = True
@@ -255,6 +257,8 @@ def turn_bulb(request, pk):
     except MultiValueDictKeyError:
         return Response('You need to provide flag as a key', status=status.HTTP_400_BAD_REQUEST)
     except BulbException:
+        driver.data = False
+        driver.save()
         return Response('Could not connect to the bulb', status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
     return Response(status=status.HTTP_200_OK)
@@ -304,6 +308,8 @@ def bulb_color(request, pk):
         try:
             bulb.set_rgb(red, green, blue)
         except BulbException:
+            driver.data = False
+            driver.save()
             return Response('Could not connect to the bulb', status=status.HTTP_503_SERVICE_UNAVAILABLE)
         return Response(status=status.HTTP_200_OK)
 

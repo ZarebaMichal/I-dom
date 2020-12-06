@@ -29,7 +29,7 @@ class DriversAdmin(admin.ModelAdmin):
     """
 
     model = Drivers
-    list_display = ('name', 'id', 'category', 'is_active', 'ip_address',)
+    list_display = ('name', 'id', 'category', 'is_active', 'ip_address', 'data',)
     list_filter = ('is_active', 'category',)
     search_fields = ('name',)
 
