@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'twilio',
     'webpack_loader',
     'driver',
+    'silk',
     'djqscsv',
     ]
 
@@ -81,6 +82,7 @@ SWAGGER_SETTINGS = {
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'silk.middleware.SilkyMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -88,7 +90,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+
 ]
+
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -187,3 +192,6 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = config('EMAIL_PORT')
 EMAIL_USE_TLS = config('EMAIL_USE_TLS')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+SILKY_PYTHON_PROFILER = True
+SILKY_META = True

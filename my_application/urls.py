@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.authtoken.views import obtain_auth_token
@@ -52,5 +52,6 @@ urlpatterns = [
     path('', include('driver.urls')),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api-token-auth/', decorated_obtain_token_view, name='api_token_auth'),
-    path('password-reset/', include('django_rest_passwordreset.urls', namespace='password_reset'))
+    path('password-reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+    re_path(r'^silk/', include('silk.urls', namespace='silk')),
 ]
