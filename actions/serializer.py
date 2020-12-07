@@ -27,7 +27,7 @@ class ActionsSerializer(DynamicActionsSerializer):
     sensor = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name',
                                           queryset=Sensors.objects.all(), allow_null=True,
                                           required=False)
-    trigger = serializers.IntegerField(allow_null=True, required=False)
+    trigger = serializers.DecimalField(max_digits=10, decimal_places=2, allow_null=True, required=False)
     operator = serializers.CharField(max_length=1, allow_null=True, required=False)
     driver = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name',
                                           queryset=Drivers.objects.all())

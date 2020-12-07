@@ -10,7 +10,7 @@ class Actions(models.Model):
     id = models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
     name = models.CharField(max_length=50, unique=True)
     sensor = models.ForeignKey(Sensors, on_delete=models.CASCADE, blank=True, null=True)
-    trigger = models.IntegerField(blank=True, null=True)
+    trigger = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     operator = models.CharField(max_length=1, blank=True, null=True)
     driver = models.ForeignKey(Drivers, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
