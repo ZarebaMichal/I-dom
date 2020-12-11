@@ -43,7 +43,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'password', 'telephone', 'is_active', 'is_staff')
+        fields = ('username', 'email', 'password', 'telephone', 'is_active', 'is_staff', 'language',)
 
     def clean_password(self):
         # Regardless of what the user provides, return the intial value.
@@ -59,7 +59,7 @@ class UserAdmin(BaseUserAdmin):
     add_form = UserCreationForm
 
     fieldsets = (
-        (None, {'fields': ('username', 'email', 'password', 'telephone')}),
+        (None, {'fields': ('username', 'email', 'password', 'telephone', 'language')}),
         ('Permissions', {'fields': (
             'is_active',
             'is_staff',
@@ -71,13 +71,13 @@ class UserAdmin(BaseUserAdmin):
             None,
             {
                 'classes': ('wide',),
-                'fields': ('username', 'email', 'password1', 'password2', 'telephone')
+                'fields': ('username', 'email', 'password1', 'password2', 'telephone', 'language')
             }
         ),
     )
 
-    list_display = ('username', 'email', 'telephone', 'is_staff', 'sms_notifications', 'app_notifications')
-    list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
+    list_display = ('username', 'email', 'telephone', 'is_staff', 'sms_notifications', 'app_notifications', 'language',)
+    list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups', 'language',)
     search_fields = ('username',)
     filter_horizontal = ('groups', 'user_permissions',)
 

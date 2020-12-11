@@ -1,9 +1,16 @@
+from languages.fields import LanguageField
 from rest_framework import serializers
 from register.models import CustomUser
 from phonenumber_field.serializerfields import PhoneNumberField
 
 
 class CustomUserSerializer(serializers.Serializer):
+
+    LANGUAGES = [
+        ('pl', 'pl'),
+        ('eng', 'eng'),
+    ]
+
     id = serializers.IntegerField(read_only=True)
     username = serializers.CharField(required=True)
     password1 = serializers.CharField(write_only=True)
@@ -14,6 +21,7 @@ class CustomUserSerializer(serializers.Serializer):
     app_notifications = serializers.BooleanField(default=True)
     is_staff = serializers.BooleanField(default=False)
     is_active = serializers.BooleanField(default=True)
+    language = serializers.ChoiceField(choices=LANGUAGES, required=False)
 
     @staticmethod
     def validate_email(value):
@@ -67,6 +75,7 @@ class CustomUserSerializer(serializers.Serializer):
             user = CustomUser.objects.create(username=validated_data.get('username'),
                                              email=validated_data.get('email'),
                                              password=validated_data.get('password1'),
+                                             language=validated_data.get('language'),
                                              telephone=validated_data.get('telephone'))
             user.set_password(validated_data.get('password1'))
             user.save()
@@ -93,12 +102,19 @@ class DynamicUpdateCustomUserSerializer(serializers.ModelSerializer):
 
 
 class UpdateCustomUserSerializer(DynamicUpdateCustomUserSerializer):
+
+    LANGUAGES = [
+        ('pl', 'pl'),
+        ('eng', 'eng'),
+    ]
+
     email = serializers.EmailField(required=False)
     telephone = PhoneNumberField(required=False, trim_whitespace=True, allow_blank=True)
+    language = serializers.ChoiceField(choices=LANGUAGES, required=False)
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'telephone', 'sms_notifications', 'app_notifications']
+        fields = ['email', 'telephone', 'sms_notifications', 'app_notifications', 'language']
 
     @staticmethod
     def validate_telephone(value):
@@ -130,6 +146,7 @@ class UpdateCustomUserSerializer(DynamicUpdateCustomUserSerializer):
         instance.telephone = validated_data.get('telephone', instance.telephone)
         instance.sms_notifications = validated_data.get('sms_notifications', instance.sms_notifications)
         instance.app_notifications = validated_data.get('app_notifications', instance.app_notifications)
+        instance.language = validated_data.get('language', instance.language)
         instance.save()
 
         return instance
