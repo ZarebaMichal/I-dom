@@ -30,13 +30,13 @@ class ActionsSerializer(DynamicActionsSerializer):
     trigger = serializers.DecimalField(max_digits=10, decimal_places=2, allow_null=True, required=False)
     operator = serializers.CharField(max_length=1, allow_null=True, required=False)
     driver = serializers.SlugRelatedField(read_only=False, many=False, slug_field='name',
-                                          queryset=Drivers.objects.all())
+                                          queryset=Drivers.objects.all(), required=False)
     is_active = serializers.BooleanField(default=True)
-    days = serializers.CharField(max_length=250)
-    start_event = serializers.TimeField()
-    end_event = serializers.TimeField(allow_null=True, required=False)
-    action = serializers.CharField(max_length=50)
-    flag = serializers.IntegerField()
+    days = serializers.CharField(max_length=250, required=False)
+    start_event = serializers.TimeField(format='%H:%M', input_formats=['%H:%M'], required=False)
+    end_event = serializers.TimeField(format='%H:%M', input_formats=['%H:%M'], allow_null=True, required=False)
+    action = serializers.CharField(max_length=50, required=False)
+    flag = serializers.IntegerField(required=False)
 
     class Meta:
         model = Actions

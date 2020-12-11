@@ -72,6 +72,7 @@ def add_action(request):
 # <--------- UPDATE DRIVER ---------> #
 
 
+@swagger_auto_schema(methods=["put"], request_body=ActionsSerializer())
 @api_view(['PUT'])
 #@permission_classes([IsAuthenticated])
 def update_action(request, pk):

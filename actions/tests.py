@@ -221,10 +221,10 @@ class UpdateActionAPIViewTestCase(APITestCase):
         self.category_driver = 'remote_control'
         self.test_driver = Drivers.objects.create(name=self.name_driver, category=self.category_driver, data=False)
 
-        self.id = 9
+        self.id = 200
         self.name = 'bulb_night'
         self.sensor = self.test_sensor
-        self.trigger = '15'
+        self.trigger = 15.00
         self.operator = '<'
         self.driver = self.test_driver
         self.days = '1, 2'
@@ -238,11 +238,11 @@ class UpdateActionAPIViewTestCase(APITestCase):
                                                   action=self.action, flag=self.flag)
 
         self.validated_payload = {
-            "end_event": "14:00",
+            "end_event": "14:00"
         }
 
         self.non_validated_payload = {
-            "sensor": "Pilot",
+            "flag": "Fail_test"
         }
 
     def test_update_action(self):
