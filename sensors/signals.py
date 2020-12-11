@@ -9,8 +9,6 @@ from register.models import CustomUser
 from pyfcm import FCMNotification
 from twilio.rest import Client
 from decouple import config
-
-
 from sensors.models import Sensors, SensorsData
 import requests
 
@@ -68,7 +66,7 @@ def push_notifications(sender, instance, **kwargs):
                                                           message_body=message_body,
                                                           click_action="FLUTTER_NOTIFICATION_CLICK",
                                                           android_channel_id="flutter.idom/notifications")
-            print(result)
+
 
 
 @receiver(pre_save, sender=SensorsData)
@@ -80,10 +78,13 @@ def sms_notifications(sender, instance, **kwargs):
     else:
         if sensor.category == 'smoke':
             element = 'dym'
+            element_eng = 'smoke'
         elif sensor.category == 'gas':
             element = 'gaz'
+            element_eng = 'gas'
         elif sensor.category == 'rain_sensor':
             element = 'deszcz'
+            element_eng = 'rain'
 
         categories = ['smoke', 'gas', 'rain_sensor']
 
@@ -101,12 +102,21 @@ def sms_notifications(sender, instance, **kwargs):
             client = Client(config('TWILIO_ACCOUNT_SID'), config('TWILIO_AUTH_TOKEN'))
 
            # Iterate over users to send them SMS
+
             for user in users_list:
                 # MySQL keeps empty records as str
                 if type(user.telephone) is not str:
-                    message = client.messages \
-                                    .create(
-                                        body=f"Czujnik {sensor.name} wykryl {element}, TEST FROM IDOM",
-                                        from_=config('TWILIO_NUMBER'),
-                                        to=str(user.telephone)
-                                            )
+                    if user.language == 'pl':
+                        message = client.messages \
+                                        .create(
+                                            body=f"Czujnik {sensor.name} wykryl {element}",
+                                            from_=config('TWILIO_NUMBER'),
+                                            to=str(user.telephone)
+                                                )
+                    elif user.language == 'eng':
+                        message = client.messages \
+                                        .create(
+                                            body=f"Sensor {sensor.name} detected {element_eng}",
+                                            from_=config('TWILIO_NUMBER'),
+                                            to=str(user.telephone)
+                                                )
