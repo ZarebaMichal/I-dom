@@ -35,9 +35,9 @@ class VideoCamera(object):
         :param ip:
         """
         # Wersja IP cam telefon
-        self.cam = 'http://' + str(ip) + ':8080' + '/video'
+        #self.cam = 'http://' + str(ip) + ':8080' + '/video'
         # Wersja IP cam ESP
-        #self.cam = 'rtsp://' + str(ip) + ':8554/mjpeg/1'
+        self.cam = 'rtsp://' + str(ip) + ':8554/mjpeg/1'
         self.video = cv2.VideoCapture(self.cam)
 
         # Parameters of stream, buffer
@@ -56,6 +56,8 @@ class VideoCamera(object):
         self.read_lock = threading.Lock()
         self.counter = 5
         self.counter_old = 0
+
+        self.face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
     def start(self):
         if self.started:
@@ -83,6 +85,11 @@ class VideoCamera(object):
         if self.frame is None:
             return self.__exit__()
         frame = self.frame.copy()
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
+
+        for (x, y, w, h) in faces:
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
         self.read_lock.release()
         self.counter += 1
         self.counter_old = self.counter
