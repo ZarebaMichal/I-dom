@@ -113,6 +113,7 @@ def delete_sensor(request, pk, format=None):
     return Response(status=status.HTTP_200_OK)
 
 
+@gzip.gzip_page
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def list_of_sensors_data(request, format=None):
@@ -121,12 +122,12 @@ def list_of_sensors_data(request, format=None):
     :param request: GET
     :return: list of all sensors if ok http 200 response
     """
-    # sensors_data = SensorsData.objects.all()
     sensors_data = SensorsData.objects.select_related('sensor')
     serializer = SensorsDataSerializer(sensors_data, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@gzip.gzip_page
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def list_of_sensors_data_from_one_sensor(request, pk, format=None):
@@ -261,10 +262,16 @@ def data_to_csv(request):
                     }
     :return: CSV file "sensors_data" and Http response code 200
     """
-    from timeit import default_timer as timer
 
-    start = timer()
-    # ...
+    params = ['sensors_ids', 'categories', 'days']
+
+    # Validation
+    for par in params:
+        if par not in request.data:
+            return Response(f'You have to provide {par}', status=status.HTTP_400_BAD_REQUEST)
+
+    if int(request.data['days']) not in range(0, 30):
+        return Response('Choose between 1-30 days', status=status.HTTP_400_BAD_REQUEST)
 
     # User provides only sensor categories
     if request.data['categories'] is not None:
@@ -276,9 +283,7 @@ def data_to_csv(request):
                                     days=int(request.data['days'])))
                         .values('delivery_time', 'sensor_data').
                         annotate(sensor_name=F('sensor__name')))
-        end = timer()
-        print(end - start)  # Time in seconds, e.g. 5.38091952400282
-        return render_to_csv_response(sensors_data, filename='sensor_data.csv')
+        return render_to_csv_response(sensors_data, filename='sensor_data.csv',  streaming=True)
 
     # User provides only 1 sensor with time
     elif request.data['sensors_ids'] is not None and len(request.data['sensors_ids']) == 1:
@@ -288,9 +293,7 @@ def data_to_csv(request):
                                 delivery_time__gte=datetime.now(tz=timezone.utc) - timedelta(
                                     days=int(request.data['days'])))
                         .values('delivery_time', 'sensor_data'))
-        end = timer()
-        print(end - start)  # Time in seconds, e.g. 5.38091952400282
-        return render_to_csv_response(sensors_data, filename='sensor_data.csv')
+        return render_to_csv_response(sensors_data, filename='sensor_data.csv',  streaming=True)
 
 
     # User provides more than 1 sensor with time
@@ -303,9 +306,7 @@ def data_to_csv(request):
                                     days=int(request.data['days'])))
                         .values('delivery_time', 'sensor_data').
                         annotate(sensor_name=F('sensor__name')))
-        end = timer()
-        print(end - start)  # Time in seconds, e.g. 5.38091952400282
-        return render_to_csv_response(sensors_data, filename='sensor_data.csv')
+        return render_to_csv_response(sensors_data, filename='sensor_data.csv',  streaming=True)
 
     # User request all sensor with all categories in given time
     elif request.data['sensors_ids'] is None and request.data['categories'] is None:
@@ -316,9 +317,7 @@ def data_to_csv(request):
             delivery_time__gte=datetime.now(tz=timezone.utc) - timedelta(days=int(request.data['days'])))
                         .values('delivery_time', 'sensor_data').
                         annotate(sensor_name=F('sensor__name'), sensor_category=F('sensor__category')))
-        end = timer()
-        print(end - start)  # Time in seconds, e.g. 5.38091952400282
-        return render_to_csv_response(sensors_data, filename='sensor_data.csv')
+        return render_to_csv_response(sensors_data, filename='sensor_data.csv', streaming=True)
 
 
 @api_view(['PUT'])
