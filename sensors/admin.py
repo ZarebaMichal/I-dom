@@ -30,7 +30,7 @@ class SensorAdmin(admin.ModelAdmin):
     """
 
     model = Sensors
-    list_display = ('name', 'id', 'category', 'notifications', 'is_active', 'frequency', 'ip_address')
+    list_display = ('name', 'id', 'category', 'notifications', 'is_active', 'frequency', 'ip_address', 'battery_level',)
     list_filter = ('is_active', 'category', 'notifications',)
     search_fields = ('name', 'category',)
 

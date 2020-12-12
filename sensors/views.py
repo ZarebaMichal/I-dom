@@ -1,10 +1,9 @@
-from django.shortcuts import render
-from djqscsv import render_to_csv_response, write_csv
+from django.views.decorators import gzip
+from djqscsv import render_to_csv_response
 from django.db.models import F
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-
 from sensors import models
 from sensors.models import Sensors, SensorsData
 from sensors.serializer import SensorsSerializer, SensorsDataSerializer
@@ -14,8 +13,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
 from datetime import datetime, timedelta
 from django.utils import timezone
-from django.db.models import Prefetch
-#from django_queryset_csv import render_to_csv_response
 
 
 @api_view(['GET'])
@@ -124,7 +121,7 @@ def list_of_sensors_data(request, format=None):
     :param request: GET
     :return: list of all sensors if ok http 200 response
     """
-    #sensors_data = SensorsData.objects.all()
+    # sensors_data = SensorsData.objects.all()
     sensors_data = SensorsData.objects.select_related('sensor')
     serializer = SensorsDataSerializer(sensors_data, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
@@ -132,7 +129,7 @@ def list_of_sensors_data(request, format=None):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def list_of_sensors_data_from_one_sensor(request, pk,  format=None):
+def list_of_sensors_data_from_one_sensor(request, pk, format=None):
     """
     Get list of all sensors data, only for authenticated users
     :param request: GET
@@ -250,6 +247,7 @@ def csv_view(request):
     return render_to_csv_response(qs, filename='test.csv')
 
 
+@gzip.gzip_page
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def data_to_csv(request):
@@ -263,6 +261,10 @@ def data_to_csv(request):
                     }
     :return: CSV file "sensors_data" and Http response code 200
     """
+    from timeit import default_timer as timer
+
+    start = timer()
+    # ...
 
     # User provides only sensor categories
     if request.data['categories'] is not None:
@@ -270,9 +272,12 @@ def data_to_csv(request):
                         .objects
                         .select_related('sensor')
                         .filter(sensor__category__in=request.data['categories'],
-                                delivery_time__gte=datetime.now(tz=timezone.utc)-timedelta(days=int(request.data['days'])))
+                                delivery_time__gte=datetime.now(tz=timezone.utc) - timedelta(
+                                    days=int(request.data['days'])))
                         .values('delivery_time', 'sensor_data').
                         annotate(sensor_name=F('sensor__name')))
+        end = timer()
+        print(end - start)  # Time in seconds, e.g. 5.38091952400282
         return render_to_csv_response(sensors_data, filename='sensor_data.csv')
 
     # User provides only 1 sensor with time
@@ -280,9 +285,13 @@ def data_to_csv(request):
         sensors_data = (models.SensorsData
                         .objects.select_related('sensor')
                         .filter(sensor__id=request.data['sensors_ids'][0],
-                                delivery_time__gte=datetime.now(tz=timezone.utc)-timedelta(days=int(request.data['days'])))
+                                delivery_time__gte=datetime.now(tz=timezone.utc) - timedelta(
+                                    days=int(request.data['days'])))
                         .values('delivery_time', 'sensor_data'))
+        end = timer()
+        print(end - start)  # Time in seconds, e.g. 5.38091952400282
         return render_to_csv_response(sensors_data, filename='sensor_data.csv')
+
 
     # User provides more than 1 sensor with time
     elif request.data['sensors_ids'] is not None and len(request.data['sensors_ids']) > 1:
@@ -290,9 +299,12 @@ def data_to_csv(request):
                         .objects.
                         select_related('sensor')
                         .filter(sensor__id__in=request.data['sensors_ids'],
-                                delivery_time__gte=datetime.now(tz=timezone.utc)-timedelta(days=int(request.data['days'])))
+                                delivery_time__gte=datetime.now(tz=timezone.utc) - timedelta(
+                                    days=int(request.data['days'])))
                         .values('delivery_time', 'sensor_data').
                         annotate(sensor_name=F('sensor__name')))
+        end = timer()
+        print(end - start)  # Time in seconds, e.g. 5.38091952400282
         return render_to_csv_response(sensors_data, filename='sensor_data.csv')
 
     # User request all sensor with all categories in given time
@@ -300,8 +312,32 @@ def data_to_csv(request):
         sensors_data = (models.SensorsData
                         .objects
                         .select_related('sensor').
-                        filter(delivery_time__gte=datetime.now(tz=timezone.utc)-timedelta(days=int(request.data['days'])))
+                        filter(
+            delivery_time__gte=datetime.now(tz=timezone.utc) - timedelta(days=int(request.data['days'])))
                         .values('delivery_time', 'sensor_data').
                         annotate(sensor_name=F('sensor__name'), sensor_category=F('sensor__category')))
+        end = timer()
+        print(end - start)  # Time in seconds, e.g. 5.38091952400282
         return render_to_csv_response(sensors_data, filename='sensor_data.csv')
 
+
+@api_view(['PUT'])
+def update_battery_sensor(request, pk, format=None):
+    """
+    Update battery level of sensor
+    :param request: PUT
+    :param pk: id of sensor
+    :return: If sensor doesn't exist return 404,
+            if given invalid data, return 400,
+            else if succeeded return 200
+    """
+    try:
+        sensor = Sensors.objects.get(pk=pk)
+    except Sensors.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    serializer = SensorsSerializer(sensor, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

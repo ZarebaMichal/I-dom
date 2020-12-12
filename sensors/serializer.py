@@ -38,7 +38,7 @@ class SensorsSerializer(DynamicSensorsSerializer):
 
     class Meta:
         model = Sensors
-        fields = ['id', 'name', 'category', 'frequency', 'ip_address', 'last_data']
+        fields = ['id', 'name', 'category', 'frequency', 'ip_address', 'last_data', 'battery_level']
 
     @staticmethod
     def validate_name(value):
@@ -101,6 +101,7 @@ class SensorsSerializer(DynamicSensorsSerializer):
         instance.category = validated_data.get('category', instance.category)
         instance.frequency = validated_data.get('frequency', instance.frequency)
         instance.ip_address = validated_data.get('ip_address', instance.ip_address)
+        instance.battery_level = validated_data.get('battery_level', instance.battery_level)
         instance.save()
 
         return instance
