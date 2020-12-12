@@ -15,6 +15,7 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 
 
+@gzip.gzip_page
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def list_of_sensors(request, format=None):
@@ -28,6 +29,7 @@ def list_of_sensors(request, format=None):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@gzip.gzip_page
 @swagger_auto_schema(methods=["post"], request_body=SensorsSerializer())
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -48,6 +50,7 @@ def add_sensors(request, format=None):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@gzip.gzip_page
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def sensor_detail(request, pk, format=None):
@@ -65,6 +68,7 @@ def sensor_detail(request, pk, format=None):
     return Response(serializer.data)
 
 
+@gzip.gzip_page
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_sensor(request, pk, format=None):
@@ -159,6 +163,7 @@ def add_sensor_data(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@gzip.gzip_page
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def change_frequency_data(request, pk):
@@ -199,6 +204,7 @@ def change_frequency_data(request, pk):
     return Response(status=status.HTTP_200_OK)
 
 
+@gzip.gzip_page
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_last_data(request, pk):
@@ -216,6 +222,7 @@ def get_last_data(request, pk):
         return Response(sensor_data.sensor_data, status=status.HTTP_200_OK)
 
 
+@gzip.gzip_page
 @api_view(['POST'])
 def add_sensor_ip_address(request):
     """
@@ -320,6 +327,7 @@ def data_to_csv(request):
         return render_to_csv_response(sensors_data, filename='sensor_data.csv', streaming=True)
 
 
+@gzip.gzip_page
 @api_view(['PUT'])
 def update_battery_sensor(request, pk, format=None):
     """
