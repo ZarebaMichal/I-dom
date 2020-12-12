@@ -8,9 +8,10 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from .permissions import IsUpdateProfile
 from datetime import datetime
-import json
+from django.views.decorators import gzip
 
 
+@gzip.gzip_page
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def users_list(request, format=None):
@@ -23,6 +24,7 @@ def users_list(request, format=None):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@gzip.gzip_page
 @swagger_auto_schema(methods=["post"], request_body=CustomUserSerializer())
 @api_view(['POST'])
 def register_user(request, format=None):
@@ -39,6 +41,7 @@ def register_user(request, format=None):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@gzip.gzip_page
 @api_view(['GET'])
 @permission_classes([IsAuthenticated & IsUpdateProfile | IsAdminUser])
 def user_detail(request, username, format=None):
@@ -56,6 +59,7 @@ def user_detail(request, username, format=None):
         return Response(serializer.data)
 
 
+@gzip.gzip_page
 @api_view(['GET'])
 @permission_classes([IsAuthenticated & IsUpdateProfile | IsAdminUser])
 def user_detail_pk(request, pk, format=None):
@@ -74,6 +78,7 @@ def user_detail_pk(request, pk, format=None):
         return Response(serializer.data)
 
 
+@gzip.gzip_page
 @swagger_auto_schema(methods=["put"], request_body=UpdateCustomUserSerializer())
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated & IsUpdateProfile | IsAdminUser])
@@ -106,6 +111,7 @@ def delete_user(request, pk, format=None):
         user = CustomUser.objects.get(pk=pk)
     except CustomUser.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+
     time = str(datetime.now())
     time = time.replace(" ", "")
     user.username = time

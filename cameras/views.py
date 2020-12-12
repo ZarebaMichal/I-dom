@@ -29,7 +29,7 @@ def gen_frame(cap):
         frame = cap.read()
         if frame is None:
             return HttpResponse(status=503)
-        convert = jpeg.encode(frame)
+        convert = jpeg.encode(frame, quality=70)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + convert + b'\r\n\r\n')
 
@@ -58,6 +58,7 @@ def ip_cam(request, pk):
                                      content_type='multipart/x-mixed-replace; boundary=frame')
 
 
+@gzip.gzip_page
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def list_of_cameras(request, format=None):
@@ -71,6 +72,7 @@ def list_of_cameras(request, format=None):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@gzip.gzip_page
 @swagger_auto_schema(methods=["post"], request_body=CamerasSerializer())
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -91,6 +93,7 @@ def add_cameras(request, format=None):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@gzip.gzip_page
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def camera_detail(request, pk, format=None):
@@ -108,6 +111,7 @@ def camera_detail(request, pk, format=None):
     return Response(serializer.data)
 
 
+@gzip.gzip_page
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_camera(request, pk, format=None):
@@ -158,6 +162,7 @@ def delete_camera(request, pk, format=None):
     return Response(status=status.HTTP_200_OK)
 
 
+@gzip.gzip_page
 @api_view(['POST'])
 def add_camera_ip_address(request):
     """

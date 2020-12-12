@@ -7,6 +7,7 @@ from driver.models import Drivers
 from driver.serializer import DriversSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
+from django.views.decorators import gzip
 from yeelight import Bulb
 from yeelight import BulbException
 from datetime import datetime
@@ -16,7 +17,7 @@ from urllib3 import exceptions
 
 # <--------- LIST OF DRIVERS ---------> #
 
-
+@gzip.gzip_page
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def list_of_drivers(request):
@@ -30,6 +31,7 @@ def list_of_drivers(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@gzip.gzip_page
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def driver_detail(request, pk):
@@ -49,7 +51,7 @@ def driver_detail(request, pk):
 
 # <--------- CREATE DRIVER ---------> #
 
-
+@gzip.gzip_page
 @swagger_auto_schema(methods=["post"], request_body=DriversSerializer())
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -72,7 +74,7 @@ def add_driver(request):
 
 # <--------- UPDATE DRIVER ---------> #
 
-
+@gzip.gzip_page
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_driver(request, pk):
@@ -128,7 +130,7 @@ def delete_driver(request, pk):
 
 # <--------- IP OF DRIVER ---------> #
 
-
+@gzip.gzip_page
 @api_view(['POST'])
 def add_driver_ip_address(request):
     """
@@ -157,7 +159,7 @@ def add_driver_ip_address(request):
 
 # <--------- SEND ACTION TO DRIVER ---------> #
 
-
+@gzip.gzip_page
 @api_view(['POST'])
 def send_action(request):
     """
@@ -179,6 +181,7 @@ def send_action(request):
     return Response(result)
 
 
+@gzip.gzip_page
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_bulb_ip(request, pk):
