@@ -1,20 +1,28 @@
-import os
+"""
+Celery config file
 
+https://docs.celeryproject.org/en/stable/django/first-steps-with-django.html
+
+"""
+from __future__ import absolute_import
+import os
 from celery import Celery
 
-# set the default Django settings module for the 'celery' program.
+# this code copied from manage.py
+# set the default Django settings module for the 'celery' app.
+from my_application import settings
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'my_application.settings')
 
-app = Celery('my_application')
+# you change change the name here
+app = Celery("my_application")
 
-# Using a string here means the worker doesn't have to serialize
-# the configuration object to child processes.
-# - namespace='CELERY' means all celery-related configuration keys
-#   should have a `CELERY_` prefix.
+# read config from Django settings, the CELERY namespace would make celery
+# config keys has `CELERY` prefix
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
-# Load task modules from all registered Django app configs.
-app.autodiscover_tasks()
+# load tasks.py in django apps
+app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 
 @app.task(bind=True)

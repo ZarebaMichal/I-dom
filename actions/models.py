@@ -1,5 +1,4 @@
 from django.db import models
-
 from driver.models import Drivers
 from sensors.models import Sensors
 import json

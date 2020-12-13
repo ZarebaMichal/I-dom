@@ -190,8 +190,5 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # CELERY STUFF
-BROKER_URL = 'amqp://test:test@localhost:5672/rbbitmq'
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
+CELERY_BROKER_URL = 'amqp://test:test@localhost:5672/rbbitmq'
 CELERY_TIMEZONE = 'Europe/Warsaw'
