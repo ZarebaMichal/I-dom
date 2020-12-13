@@ -1,10 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
-from decouple import config
-from requests import Response
 from fcm_django.models import FCMDevice
-from my_application.settings import FCM_SERVER_KEY
 from register.models import CustomUser
 from pyfcm import FCMNotification
 from twilio.rest import Client
@@ -68,7 +65,6 @@ def push_notifications(sender, instance, **kwargs):
                                                           android_channel_id="flutter.idom/notifications")
 
 
-
 @receiver(pre_save, sender=SensorsData)
 def sms_notifications(sender, instance, **kwargs):
     try:
@@ -129,18 +125,21 @@ def low_battery_level(sender, instance, **kwargs):
     except ObjectDoesNotExist:
         pass  # Object is new, so field hasn't technically changed, but you may want to do something else here.
     else:
-        if int(sensor.battery_level) == 10 or int(sensor.battery_level) == 20 or int(sensor.battery_level) == 30:
-            if sensor.notifications:
-                push_service = FCMNotification(api_key=config('FCM_APIKEY'))
+        if sensor.battery_level == None:
+            pass
+        else:
+            if int(sensor.battery_level) == 10 or int(sensor.battery_level) == 20 or int(sensor.battery_level) == 30:
+                if sensor.notifications:
+                    push_service = FCMNotification(api_key=config('FCM_APIKEY'))
 
-                fcm_token = []
-                for obj in FCMDevice.objects.filter(active=True):
-                    fcm_token.append(obj.registration_id)
+                    fcm_token = []
+                    for obj in FCMDevice.objects.filter(active=True):
+                        fcm_token.append(obj.registration_id)
 
-                message_title = f"W czujniku {sensor.name} jest niski poziom baterii, {sensor.battery_level} %"
-                message_body = f"W czujniku {sensor.name} jest niski poziom baterii, {sensor.battery_level} %"
-                result = push_service.notify_multiple_devices(registration_ids=fcm_token,
-                                                              message_title=message_title,
-                                                              message_body=message_body,
-                                                              click_action="FLUTTER_NOTIFICATION_CLICK",
-                                                              android_channel_id="flutter.idom/notifications")
+                    message_title = f"W czujniku {sensor.name} jest niski poziom baterii, {sensor.battery_level} %"
+                    message_body = f"W czujniku {sensor.name} jest niski poziom baterii, {sensor.battery_level} %"
+                    result = push_service.notify_multiple_devices(registration_ids=fcm_token,
+                                                                  message_title=message_title,
+                                                                  message_body=message_body,
+                                                                  click_action="FLUTTER_NOTIFICATION_CLICK",
+                                                                  android_channel_id="flutter.idom/notifications")
