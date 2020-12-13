@@ -20,7 +20,7 @@ class CustomUser(AbstractUser):
     is_active = models.BooleanField(default=True)
     language = models.CharField(max_length=10, choices=LANGUAGES)
 
-    REQUIRED_FIELDS = ['email', 'telephone']
+    REQUIRED_FIELDS = ['email', 'telephone', 'language']
 
     objects = CustomUserManager()
 
