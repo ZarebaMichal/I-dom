@@ -13,10 +13,10 @@ class Actions(models.Model):
     operator = models.CharField(max_length=1, blank=True, null=True)
     driver = models.ForeignKey(Drivers, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
-    days = models.CharField(max_length=250)
+    days = models.CharField(max_length=50)
     start_event = models.TimeField()
     end_event = models.TimeField(blank=True, null=True)
-    action = models.CharField(max_length=50)
+    action = models.JSONField()
     flag = models.IntegerField()
 
     class Meta:
