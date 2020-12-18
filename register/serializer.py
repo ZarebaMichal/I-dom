@@ -1,4 +1,3 @@
-from languages.fields import LanguageField
 from rest_framework import serializers
 from register.models import CustomUser
 from phonenumber_field.serializerfields import PhoneNumberField
