@@ -182,7 +182,7 @@ def send_action(request):
 
 
 @gzip.gzip_page
-@api_view(['POST'])
+@api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def add_bulb_ip(request, pk):
     """
@@ -199,20 +199,22 @@ def add_bulb_ip(request, pk):
     except ObjectDoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    bulb = Bulb(driver.ip_address)
+    data = {
+        'ip_address': request.data['ip_address']
+    }
 
-    try:
-        bulb.get_properties()
-    except BulbException:
-        driver.data = False
-        driver.save()
-        return Response('Could not connect to the bulb', status=status.HTTP_503_SERVICE_UNAVAILABLE)
-
-    driver.data = True
-    driver.save()
-    serializer = DriversSerializer(driver, data=request.data['ip_address'])
+    serializer = DriversSerializer(driver, data=data)
     if serializer.is_valid():
         serializer.save()
+        try:
+            bulb = Bulb(driver.ip_address)
+            bulb.get_properties()
+        except BulbException:
+            driver.data = False
+            driver.save()
+            return Response('Could not connect to the bulb', status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        driver.data = True
+        driver.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
