@@ -4,8 +4,8 @@ from django.dispatch import receiver
 from fcm_django.models import FCMDevice
 from register.models import CustomUser
 from pyfcm import FCMNotification
-from twilio.rest import Client
 from decouple import config
+from twilio.rest import Client
 from sensors.models import Sensors, SensorsData
 import requests
 
@@ -15,12 +15,10 @@ def do_something_if_changed(sender, instance, **kwargs):
     try:
         sensor = Sensors.objects.get(pk=instance.pk)
     except ObjectDoesNotExist:
-        pass # Object is new, so field hasn't technically changed, but you may want to do something else here.
+        return 'Sensor doesnt exists'
     else:
-        if not sensor.frequency == instance.frequency: # Field has changed
-            # do something
+        if not sensor.frequency == instance.frequency:  # Field has changed
             data_for_sensor = {
-                #'id': sensor.id,
                 'name': sensor.name,
                 'frequency': instance.frequency
             }
@@ -39,7 +37,7 @@ def push_notifications(sender, instance, **kwargs):
     try:
         sensor = Sensors.objects.get(pk=instance.sensor_id)
     except ObjectDoesNotExist:
-        pass # Object is new, so field hasn't technically changed, but you may want to do something else here.
+        pass  # Object is new, so field hasn't technically changed, but you may want to do something else here.
     else:
         if sensor.category == 'smoke':
             element = 'dym'
@@ -52,10 +50,9 @@ def push_notifications(sender, instance, **kwargs):
         if sensor.notifications and sensor.category in categories:
             push_service = FCMNotification(api_key=config('FCM_APIKEY'))
 
-            fcm_token = []
-            for obj in FCMDevice.objects.filter(active=True):
-                fcm_token.append(obj.registration_id)
+            fcm_token = [obj.registration_id for obj in FCMDevice.objects.filter(active=True)]
 
+            # ToDo: Different message depending on user language field
             message_title = f"Czujnik {sensor.name} wykrył {element}"
             message_body = f"Czujnik {sensor.name} wykrył {element}. Uważaj na siebie!"
             result = push_service.notify_multiple_devices(registration_ids=fcm_token,
@@ -67,55 +64,49 @@ def push_notifications(sender, instance, **kwargs):
 
 @receiver(pre_save, sender=SensorsData)
 def sms_notifications(sender, instance, **kwargs):
+
     try:
         sensor = Sensors.objects.get(pk=instance.sensor_id)
     except ObjectDoesNotExist:
-        pass  # Object is new, so field hasn't technically changed, but you may want to do something else here.
+        return "Sensors doesn't exists"
     else:
-        if sensor.category == 'smoke':
-            element = 'dym'
-            element_eng = 'smoke'
-        elif sensor.category == 'gas':
-            element = 'gaz'
-            element_eng = 'gas'
-        elif sensor.category == 'rain_sensor':
-            element = 'deszcz'
-            element_eng = 'rain'
+        d = {
+                'gas': 'gaz',
+                'smoke': 'dym',
+                'rain_sensor': ['rain', 'deszcz']
+            }
 
         categories = ['smoke', 'gas', 'rain_sensor']
 
         if sensor.notifications and sensor.category in categories:
-            # Get users with sms notifications turned ON
+            # Get users with sms notifications turned ON and with telephone number
             try:
-                users = CustomUser.objects.filter(sms_notifications=True)
+                users = CustomUser.objects.exclude(sms_notifications=False)\
+                                          .exclude(telephone='')\
+                                          .exclude(telephone__isnull=True)
             except ObjectDoesNotExist:
-                return 'No users with notficiations turned ON'
+                return 'No users with notifications turned ON'
 
-            # Conver users objects to list
+            # Convert users objects to list
             users_list = list(users)
-
             # Load Twilio client
             client = Client(config('TWILIO_ACCOUNT_SID'), config('TWILIO_AUTH_TOKEN'))
 
-           # Iterate over users to send them SMS
-
+            # Iterate over users to send them SMS
             for user in users_list:
-                # MySQL keeps empty records as str
-                if type(user.telephone) is not str:
-                    if user.language == 'pl':
-                        message = client.messages \
-                                        .create(
-                                            body=f"Czujnik {sensor.name} wykryl {element}",
-                                            from_=config('TWILIO_NUMBER'),
-                                            to=str(user.telephone)
-                                                )
-                    elif user.language == 'eng':
-                        message = client.messages \
-                                        .create(
-                                            body=f"Sensor {sensor.name} detected {element_eng}",
-                                            from_=config('TWILIO_NUMBER'),
-                                            to=str(user.telephone)
-                                                )
+                if user.language == 'pl':
+                    element = d['rain_sensor'][1] if sensor.category == 'rain_sensor' else d[sensor.category]
+                    body = f"Czujnik {sensor.name} wykrył {element}"
+                elif user.language == 'eng':
+                    element = d['rain_sensor'][0] if sensor.category == 'rain_sensor' else sensor.category
+                    body = f"Sensor {sensor.name} detected {element}"
+
+                client.messages \
+                      .create(
+                          body=body,
+                          from_=config('TWILIO_NUMBER'),
+                          to=str(user.telephone)
+                             )
 
 
 @receiver(post_save, sender=Sensors)
@@ -123,23 +114,18 @@ def low_battery_level(sender, instance, **kwargs):
     try:
         sensor = Sensors.objects.get(pk=instance.id)
     except ObjectDoesNotExist:
-        pass  # Object is new, so field hasn't technically changed, but you may want to do something else here.
+        return "Sensor doesn't exists"
+
     else:
-        if sensor.battery_level == None:
-            pass
-        else:
-            if int(sensor.battery_level) == 10 or int(sensor.battery_level) == 20 or int(sensor.battery_level) == 30:
-                if sensor.notifications:
-                    push_service = FCMNotification(api_key=config('FCM_APIKEY'))
+        if sensor.battery_level is not None and sensor.battery_level in (10, 20, 30) and sensor.notifications:
+            push_service = FCMNotification(api_key=config('FCM_APIKEY'))
+            fcm_token = [obj.registration_id for obj in FCMDevice.objects.filter(active=True)]
 
-                    fcm_token = []
-                    for obj in FCMDevice.objects.filter(active=True):
-                        fcm_token.append(obj.registration_id)
-
-                    message_title = f"W czujniku {sensor.name} jest niski poziom baterii, {sensor.battery_level} %"
-                    message_body = f"W czujniku {sensor.name} jest niski poziom baterii, {sensor.battery_level} %"
-                    result = push_service.notify_multiple_devices(registration_ids=fcm_token,
-                                                                  message_title=message_title,
-                                                                  message_body=message_body,
-                                                                  click_action="FLUTTER_NOTIFICATION_CLICK",
-                                                                  android_channel_id="flutter.idom/notifications")
+            # ToDo: Different messages depending on user language field
+            message_title = f"W czujniku {sensor.name} jest niski poziom baterii, {sensor.battery_level} %"
+            message_body = f"W czujniku {sensor.name} jest niski poziom baterii, {sensor.battery_level} %"
+            result = push_service.notify_multiple_devices(registration_ids=fcm_token,
+                                                          message_title=message_title,
+                                                          message_body=message_body,
+                                                          click_action="FLUTTER_NOTIFICATION_CLICK",
+                                                          android_channel_id="flutter.idom/notifications")
