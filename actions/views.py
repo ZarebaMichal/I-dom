@@ -7,7 +7,6 @@ from actions.models import Actions
 from actions.serializer import ActionsSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
-from actions.tasks import setup_periodic_tasks
 
 
 # <--------- LIST OF DRIVERS ---------> #
@@ -61,8 +60,6 @@ def add_action(request):
     serializer = ActionsSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
-        if request.data['flag'] == 1:
-            setup_periodic_tasks(instance=request)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
         if 'sensor' in serializer.errors:

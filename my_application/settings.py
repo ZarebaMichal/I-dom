@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'driver',
     'djqscsv',
     'actions',
+    'django_celery_beat',
     ]
 
 FCM_SERVER_KEY = config('FCM_APIKEY')

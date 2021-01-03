@@ -1,7 +1,12 @@
+from datetime import datetime
+
 from rest_framework import serializers
 from driver.models import Drivers
 from sensors.models import Sensors
 from actions.models import Actions
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
+from actions.tasks import action_flag_1
+
 
 
 class DynamicActionsSerializer(serializers.ModelSerializer):
@@ -73,6 +78,23 @@ class ActionsSerializer(DynamicActionsSerializer):
                                         flag=validated_data.get('flag')
                                         )
         action.save()
+        s_hours = validated_data.get('start_event').hour
+        s_minutes = validated_data.get('start_event').minute
+        schedule, _ = CrontabSchedule.objects.get_or_create(
+            minute=s_minutes,
+            hour=s_hours,
+            day_of_week=validated_data.get('days'),
+            day_of_month='*',
+            month_of_year='*',
+        )
+        task = PeriodicTask.objects.create(
+            crontab=schedule,
+            name=validated_data.get("name"),
+            task=action_flag_1,
+            args=[validated_data.get("driver")],
+        )
+
+
         return action
 
     def update(self, instance, validated_data):
