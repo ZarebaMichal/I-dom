@@ -25,6 +25,7 @@ cryptography==3.2.1
 distlib==0.3.0
 dj-database-url==0.5.0
 Django==3.1.4
+django-celery-beat==2.1.0
 django-cors-headers==3.3.0
 django-crispy-forms==1.9.0
 django-debug-toolbar==3.1.1
@@ -33,6 +34,7 @@ django-phonenumber-field==4.0.0
 django-queryset-csv==1.1.0
 django-rest-auth==0.9.5
 django-rest-passwordreset==1.1.0
+django-timezone-field==4.0
 django-webpack-loader==0.7.0
 djangorestframework==3.11.0
 drf-yasg==1.17.1
@@ -82,6 +84,7 @@ PyJWT==1.7.1
 PyMySQL==0.9.3
 pyOpenSSL==19.1.0
 pyparsing==2.4.7
+python-crontab==2.5.1
 python-dateutil==2.8.1
 python-decouple==3.3
 PyTurboJPEG @ git+git://github.com/lilohuang/PyTurboJPEG.git@614e1edd155f468ecce10ccfa8efba82d960d1ae
