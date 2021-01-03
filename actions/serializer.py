@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from rest_framework import serializers
@@ -59,6 +60,24 @@ class ActionsSerializer(DynamicActionsSerializer):
             raise serializers.ValidationError('Action with provided name already exists')
         return value
 
+    @staticmethod
+    def create_periodic_task(action):
+        s_hours = action.start_event.hour
+        s_minutes = action.start_event.minute
+        if action.flag == 1:
+            schedule = CrontabSchedule.objects.create(
+                minute=s_minutes,
+                hour=s_hours,
+                day_of_week=action.days,
+            )
+            PeriodicTask.objects.create(
+                crontab=schedule,
+                name=action.name,
+                task="action_flag_1",
+                args=json.dumps([action.driver.name]),
+                enabled=True
+            )
+
     def create(self, validated_data):
         """
         Create and return new action instance, given the validated data
@@ -78,23 +97,7 @@ class ActionsSerializer(DynamicActionsSerializer):
                                         flag=validated_data.get('flag')
                                         )
         action.save()
-        s_hours = validated_data.get('start_event').hour
-        s_minutes = validated_data.get('start_event').minute
-        schedule, _ = CrontabSchedule.objects.get_or_create(
-            minute=s_minutes,
-            hour=s_hours,
-            day_of_week=validated_data.get('days'),
-            day_of_month='*',
-            month_of_year='*',
-        )
-        task = PeriodicTask.objects.create(
-            crontab=schedule,
-            name=validated_data.get("name"),
-            task=action_flag_1,
-            args=[validated_data.get("driver")],
-        )
-
-
+        self.create_periodic_task(action)
         return action
 
     def update(self, instance, validated_data):

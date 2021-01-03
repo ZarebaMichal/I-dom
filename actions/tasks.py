@@ -11,10 +11,10 @@ logger = get_task_logger(__name__)
 
 
 @shared_task(name="action_flag_1")
-def action_flag_1(data):
+def action_flag_1(driver):
     logger.info("Let's start with this event!")
     try:
-        driver_instance = Drivers.objects.get(name=data[0])
+        driver_instance = Drivers.objects.get(name=driver)
     except Drivers.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
