@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'driver',
     'silk',
     'djqscsv',
+    'actions',
+    'django_celery_beat',
     ]
 
 FCM_SERVER_KEY = config('FCM_APIKEY')
@@ -90,10 +92,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-
 ]
-
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -195,3 +194,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 SILKY_PYTHON_PROFILER = True
 SILKY_META = True
+
+# CELERY STUFF
+CELERY_BROKER_URL = 'amqp://test:test@localhost:5672/rbbitmq'
+CELERY_TIMEZONE = 'Europe/Warsaw'
