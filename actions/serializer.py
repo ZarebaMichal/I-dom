@@ -74,7 +74,7 @@ class ActionsSerializer(DynamicActionsSerializer):
                 crontab=schedule,
                 name=action.name,
                 task="action_flag_1",
-                args=json.dumps([action.driver.name]),
+                args=json.dumps([action.driver.name, action.action]),
                 enabled=True
             )
 

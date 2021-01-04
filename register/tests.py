@@ -1,19 +1,12 @@
 import json
-
 from rest_framework.exceptions import ErrorDetail
-
 from register.models import CustomUser
-from django.urls import reverse
-
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.authtoken.models import Token
 from django_rest_passwordreset.models import ResetPasswordToken
 from register.serializer import CustomUserSerializer, UpdateCustomUserSerializer
 from django.test import Client
 import unittest
-
-from django.test import TestCase
-from django.contrib.auth import get_user_model
 
 
 class CreateUserAPIViewTestCase(APITestCase):
@@ -28,7 +21,8 @@ class CreateUserAPIViewTestCase(APITestCase):
             'email': 'test1@test.pl',
             'password1': 'test',
             'password2': 'test',
-            'telephone': '+48123456789'
+            'telephone': '+48123456789',
+            'language': 'pl'
         }
 
         response = self.client.post('/users/add', user_data)
@@ -44,7 +38,8 @@ class CreateUserAPIViewTestCase(APITestCase):
             'email': 'test1@test.pl',
             'password1': '',
             'password2': '',
-            'telephone': ''
+            'telephone': '',
+            'language': 'pl'
         }
 
         response = self.client.post('/users/add', user_data)
@@ -60,7 +55,8 @@ class CreateUserAPIViewTestCase(APITestCase):
             'email': 'test1@test.pl',
             'password1': 'test',
             'password2': 'test123',
-            'telephone': ''
+            'telephone': '',
+            'language': 'pl'
         }
 
         response = self.client.post('/users/add', user_data)
@@ -76,7 +72,8 @@ class CreateUserAPIViewTestCase(APITestCase):
             'email': 'test1@test.pl',
             'password1': 'test',
             'password2': 'test',
-            'telephone': ''
+            'telephone': '',
+            'language': 'pl'
         }
 
         response = self.client.post('/users/add', user_data)
@@ -92,7 +89,8 @@ class CreateUserAPIViewTestCase(APITestCase):
             'email': 'test',
             'password1': 'test',
             'password2': 'test',
-            'telephone': ''
+            'telephone': '',
+            'language': 'eng'
         }
 
         response = self.client.post('/users/add', user_data)
@@ -108,7 +106,8 @@ class CreateUserAPIViewTestCase(APITestCase):
             'email': 'test1@test.pl',
             'password1': 'test',
             'password2': 'test',
-            'telephone': '123'
+            'telephone': '123',
+            'language': 'pl'
         }
 
         response = self.client.post('/users/add', user_data)
@@ -124,7 +123,8 @@ class CreateUserAPIViewTestCase(APITestCase):
             'email': 'test1@test.pl',
             'password1': 'test',
             'password2': 'test',
-            'telephone': ''
+            'telephone': '',
+            'language': 'pl'
         }
 
         self.client.post('/users/add', user_data)
@@ -134,7 +134,8 @@ class CreateUserAPIViewTestCase(APITestCase):
             'email': 'test@test.pl',
             'password1': 'test',
             'password2': 'test',
-            'telephone': ''
+            'telephone': '',
+            'language': 'pl'
         }
 
         response = self.client.post('/users/add', user_data_2)
@@ -148,9 +149,10 @@ class UsersListAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_superuser(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
 
         self.token, self.created = Token.objects.get_or_create(user=self.user)
@@ -187,9 +189,10 @@ class UserUpdateAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
         self.token = Token.objects.create(user=self.user)
         self.client = APIClient(HTTP_AUTHORIZATION='Token ' + self.token.key)
@@ -198,9 +201,10 @@ class UserUpdateAPIViewTestCase(APITestCase):
         self.email2 = "test@gmail.com"
         self.password2 = "test"
         self.telephone2 = '+48666666666'
+        self.language = 'pl'
 
         self.user2 = CustomUser.objects.create_superuser(
-            self.username2, self.email2, self.password2, self.telephone2
+            self.username2, self.email2, self.password2, self.telephone2, self.language
         )
 
         self.token2, self.created2 = Token.objects.get_or_create(user=self.user2)
@@ -265,9 +269,10 @@ class UserLoginAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
 
     def test_authentication_without_data(self):
@@ -334,9 +339,10 @@ class UserLogoutAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
         self.token = Token.objects.create(user=self.user)
 
@@ -376,9 +382,10 @@ class UserPasswordResetAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
 
     def test_password_reset_without_email(self):
@@ -413,9 +420,10 @@ class DeleteUserAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_superuser(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
 
         self.token, self.created = Token.objects.get_or_create(user=self.user)
@@ -427,7 +435,7 @@ class DeleteUserAPIViewTestCase(APITestCase):
         self.telephone2 = '+48666666666'
 
         self.user2 = CustomUser.objects.create_user(
-            self.username2, self.email2, self.password2, self.telephone2
+            self.username2, self.email2, self.password2, self.telephone2, self.language
         )
 
         self.token2, self.created2 = Token.objects.get_or_create(user=self.user2)
@@ -468,38 +476,27 @@ class TestSerializer(unittest.TestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48606707808'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
 
         self.serializer_data = {
             'username': 'Troll',
-            'email': 'chernobyl@gmail.com',
-            'password1': 'test',
-            'password2': 'test',
-            'telephone': ''
-        }
-
-        self.serializer_data_2 = {
-            'username': 'Troll',
             'email': 'chernobyl2@gmail.com',
             'password1': 'test',
             'password2': 'test',
-            'telephone': '+48606707808'
+            'telephone': '+48606707808',
+            'language': 'pl'
         }
 
     def test_serializer(self):
 
         serializer = CustomUserSerializer(data=self.serializer_data)
         self.assertEqual(serializer.is_valid(), False)
-        self.assertEqual(serializer.errors, {'email': [ErrorDetail(
-            string='Email address already exists', code='invalid')]})
-
-        serializer = CustomUserSerializer(data=self.serializer_data_2)
-        self.assertEqual(serializer.is_valid(), False)
         self.assertEqual(serializer.errors, {'telephone': [ErrorDetail(
-            string='Telephone number already exists', code='invalid')]})
+            string='This field must be unique.', code='unique')]})
 
 
 class TestUpdateSerializer(unittest.TestCase):
@@ -510,9 +507,10 @@ class TestUpdateSerializer(unittest.TestCase):
         self.email = "chernobyl3@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48606707808'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
 
         self.serializer_data = {
@@ -521,12 +519,8 @@ class TestUpdateSerializer(unittest.TestCase):
         }
 
         self.serializer_data_2 = {
-            'email': 'chernobyl3@gmail.com'
-        }
-
-        self.serializer_data_3 = {
             'sms_notifications': 'true',
-            'app_notifications': 'false'
+            'app_notifications': 'false',
         }
 
     def test_serializer(self):
@@ -536,11 +530,6 @@ class TestUpdateSerializer(unittest.TestCase):
             string='Telephone number already exists', code='invalid')]})
 
         serializer = UpdateCustomUserSerializer(data=self.serializer_data_2)
-        self.assertEqual(serializer.is_valid(), False)
-        self.assertEqual(serializer.errors, {'email': [ErrorDetail(
-            string='Email address already exists', code='invalid')]})
-
-        serializer = UpdateCustomUserSerializer(data=self.serializer_data_3)
         self.assertEqual(serializer.is_valid(), True)
 
 

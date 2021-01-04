@@ -1,13 +1,10 @@
-import json
-
 from actions.models import Actions
 from driver.models import Drivers
 from register.models import CustomUser
-from sensors.models import Sensors, SensorsData
+from sensors.models import Sensors
 from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
 from django.test import Client
-from rest_framework.test import APIClient
 
 
 class AddActionAPIViewTestCase(APITestCase):
@@ -20,9 +17,10 @@ class AddActionAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
         self.token = Token.objects.create(user=self.user)
         self.client = Client(HTTP_AUTHORIZATION='Token ' + self.token.key)
@@ -97,9 +95,10 @@ class GetListOfActionsAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
         self.token = Token.objects.create(user=self.user)
         self.client = Client(HTTP_AUTHORIZATION='Token ' + self.token.key)
@@ -153,9 +152,10 @@ class DeleteActionAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
         self.token = Token.objects.create(user=self.user)
         self.client = Client(HTTP_AUTHORIZATION='Token ' + self.token.key)
@@ -205,9 +205,10 @@ class UpdateActionAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
         self.token = Token.objects.create(user=self.user)
         self.client = Client(HTTP_AUTHORIZATION='Token ' + self.token.key)
