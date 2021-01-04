@@ -1,13 +1,156 @@
+from datetime import datetime
+from yeelight import Bulb
+from yeelight import BulbException
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from fcm_django.models import FCMDevice
 from register.models import CustomUser
+from actions.models import Actions
+from driver.models import Drivers
 from pyfcm import FCMNotification
 from decouple import config
 from twilio.rest import Client
 from sensors.models import Sensors, SensorsData
 import requests
+
+
+@receiver(pre_save, sender=SensorsData)
+def flag_3_and_4(sender, instance, **kwargs):
+
+    def correct_value_check(trigger: int, operator: str, sensor_data: int):
+        if operator == '>':
+            return True if sensor_data > trigger else False
+        elif operator == '<':
+            return True if sensor_data < trigger else False
+        elif operator == '=':
+            return True if sensor_data == trigger else False
+
+    def turn_clicker(driver: str, action: bool):
+        driver = Drivers.objects.get(name=driver)
+        try:
+            if action:
+                result = requests.post(f'http://{driver.ip_address}/', data=1)
+                result.raise_for_status()
+                driver.data = True
+            else:
+                result = requests.post(f'http://{driver.ip_address}/', data=0)
+                result.raise_for_status()
+                driver.data = False
+            driver.save()
+            return True
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            driver.data = False
+            driver.save()
+            return False
+
+    def turn_bulb(driver: str, action: bool):
+        driver = Drivers.objects.get(name=driver)
+        bulb = Bulb(driver.ip_address)
+        try:
+            if action:
+                bulb.turn_on()
+                driver.data = True
+            else:
+                bulb.turn_off()
+                driver.data = False
+            driver.save()
+            return True
+        except BulbException:
+            driver.data = False
+            driver.save()
+            return False
+
+    def set_brightness(driver: str, brightness: int):
+        driver = Drivers.objects.get(name=driver)
+        bulb = Bulb(driver.ip_address)
+        try:
+            bulb.set_brightness(brightness)
+            return True
+        except BulbException:
+            driver.data = False
+            driver.save()
+            return False
+
+    def set_colours(driver: str, red: int, green: int, blue: int):
+        driver = Drivers.objects.get(name=driver)
+        bulb = Bulb(driver.ip_address)
+        try:
+            bulb.set_rgb(red, green, blue)
+            return True
+        except BulbException:
+            driver.data = False
+            driver.save()
+            return False
+
+    try:
+        sensor = Sensors.objects.get(pk=instance.sensor.id)
+    except ObjectDoesNotExist:
+        return 'Sensor doesnt exists'
+
+    try:
+        # DevNote: Discuss with team about days in flag 3
+        actions = Actions.objects.filter(is_active=True,
+                                         flag=3,
+                                         sensor=instance.sensor.name,
+                                         days=int(datetime.today().strftime('%w')))
+    except ObjectDoesNotExist:
+        return 'There is not such action'
+
+    for action in actions:
+        if correct_value_check(int(action.trigger), action.operator, int(instance.sensor_data)):
+            driver = Drivers.object.get(name=action.driver)
+            if driver.category == 'bulb':
+                if action.action['type'] == 'turn':
+                    turn_bulb(driver, action.action['status'])
+                if action.action['type'] == 'brightness':
+                    turn_bulb(driver, True)
+                    set_brightness(driver, action.action['brightness'])
+                if action.action['type'] == 'colour':
+                    turn_bulb(driver, True)
+                    set_colours(
+                        driver,
+                        action.action['red'],
+                        action.action['green'],
+                        action.action['blue']
+                    )
+            elif driver.category == 'clicker' or driver.category == 'roller_blind':
+                turn_clicker(driver, action.action['status'])
+
+    time = datetime.time(datetime.now()).strftime('%H:%M')
+
+    try:
+        # DevNote: Discuss with team about days in flag 4
+        actions = Actions.objects.filter(is_active=True,
+                                         flag=4,
+                                         sensor=instance.sensor.name,
+                                         days=int(datetime.today().strftime('%w')),
+                                         start_event__lt=time,
+                                         end_event__gt=time
+                                         )
+
+    except ObjectDoesNotExist:
+        return 'There is not such action'
+
+    for action in actions:
+        if correct_value_check(int(action.trigger), action.operator, int(instance.sensor_data)):
+            driver = Drivers.object.get(name=action.driver)
+            if driver.category == 'bulb':
+                if action.action['type'] == 'turn':
+                    turn_bulb(driver, action.action['status'])
+                if action.action['type'] == 'brightness':
+                    turn_bulb(driver, True)
+                    set_brightness(driver, action.action['brightness'])
+                if action.action['type'] == 'colour':
+                    turn_bulb(driver, True)
+                    set_colours(
+                        driver,
+                        action.action['red'],
+                        action.action['green'],
+                        action.action['blue']
+                    )
+            elif driver.category == 'clicker' or driver.category == 'roller_blind':
+                turn_clicker(driver, action.action['status'])
 
 
 @receiver(pre_save, sender=SensorsData)

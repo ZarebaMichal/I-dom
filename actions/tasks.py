@@ -96,8 +96,9 @@ def action_flag_1(driver: str, action: dict):
                     action['green'],
                     action['blue']
                     )
-    elif driver_instance.category == 'clicker':
+    elif driver_instance.category == 'clicker' or driver_instance.category == 'roller_blind':
         turn_clicker(driver, action['status'])
+
 
     # ToDo: Other categories
     # driver_instance.data = False
