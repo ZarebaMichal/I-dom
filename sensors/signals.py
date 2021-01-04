@@ -181,27 +181,40 @@ def push_notifications(sender, instance, **kwargs):
     except ObjectDoesNotExist:
         pass  # Object is new, so field hasn't technically changed, but you may want to do something else here.
     else:
-        if sensor.category == 'smoke':
-            element = 'dym'
-        elif sensor.category == 'gas':
-            element = 'gaz'
-        elif sensor.category == 'rain_sensor':
-            element = 'deszcz'
+        d = {
+            'gas': ['gas', 'gaz'],
+            'smoke': ['smoke', 'dym'],
+            'rain_sensor': ['rain', 'deszcz']
+        }
+
         categories = ['smoke', 'gas', 'rain_sensor']
 
         if sensor.notifications and sensor.category in categories:
             push_service = FCMNotification(api_key=config('FCM_APIKEY'))
 
-            fcm_token = [obj.registration_id for obj in FCMDevice.objects.filter(active=True)]
+            pl_users_id = [obj.id for obj in CustomUser.objects.filter(language='pl')]
+            eng_users_id = [obj.id for obj in CustomUser.objects.filter(language='eng')]
 
-            # ToDo: Different message depending on user language field
-            message_title = f"Czujnik {sensor.name} wykrył {element}"
-            message_body = f"Czujnik {sensor.name} wykrył {element}. Uważaj na siebie!"
-            result = push_service.notify_multiple_devices(registration_ids=fcm_token,
-                                                          message_title=message_title,
-                                                          message_body=message_body,
-                                                          click_action="FLUTTER_NOTIFICATION_CLICK",
-                                                          android_channel_id="flutter.idom/notifications")
+            pl_fcm_token = [obj.registration_id for obj in FCMDevice.objects.filter(active=True) if
+                            obj.user_id in pl_users_id]
+            eng_fcm_token = [obj.registration_id for obj in FCMDevice.objects.filter(active=True) if
+                             obj.user_id in eng_users_id]
+
+            message_title = f"Czujnik {sensor.name} wykrył {d[sensor.category][1]}"
+            message_body = f"Czujnik {sensor.name} wykrył {d[sensor.category][1]}. Uważaj na siebie!"
+            push_service.notify_multiple_devices(registration_ids=pl_fcm_token,
+                                                 message_title=message_title,
+                                                 message_body=message_body,
+                                                 click_action="FLUTTER_NOTIFICATION_CLICK",
+                                                 android_channel_id="flutter.idom/notifications")
+
+            message_title = f"Sensor {sensor.name} detected {d[sensor.category][0]}"
+            message_body = f"Sensor {sensor.name} detected {d[sensor.category][0]}. Watch out for yourself!"
+            push_service.notify_multiple_devices(registration_ids=eng_fcm_token,
+                                                 message_title=message_title,
+                                                 message_body=message_body,
+                                                 click_action="FLUTTER_NOTIFICATION_CLICK",
+                                                 android_channel_id="flutter.idom/notifications")
 
 
 @receiver(pre_save, sender=SensorsData)

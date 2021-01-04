@@ -1,12 +1,9 @@
 import json
-
-from django.test import TestCase
 from register.models import CustomUser
 from cameras.models import Cameras
 from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
 from django.test import Client
-from rest_framework.test import APIClient
 
 
 class AddCameraAPIViewTestCase(APITestCase):
@@ -19,9 +16,10 @@ class AddCameraAPIViewTestCase(APITestCase):
         self.email = 'fokafoka@gmail.com'
         self.password = 'fokimajapletwy'
         self.telephone = '+48606606606'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone)
+            self.username, self.email, self.password, self.telephone, self.language)
 
         self.token = Token.objects.create(user=self.user)
         self.client = Client(HTTP_AUTHORIZATION='Token ' + self.token.key)
@@ -50,9 +48,10 @@ class GetListOfCamerasAPIViewTestCase(APITestCase):
         self.email = 'fokafoka@gmail.com'
         self.password = 'fokimajapletwy'
         self.telephone = '+48606606606'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone)
+            self.username, self.email, self.password, self.telephone, self.language)
 
         self.token = Token.objects.create(user=self.user)
         self.client = Client(HTTP_AUTHORIZATION='Token ' + self.token.key)
@@ -87,9 +86,10 @@ class DeleteCameraAPIViewTestCase(APITestCase):
         self.email = 'fokafoka@gmail.com'
         self.password = 'fokimajapletwy'
         self.telephone = '+48606606606'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone)
+            self.username, self.email, self.password, self.telephone, self.language)
 
         self.token = Token.objects.create(user=self.user)
         self.client = Client(HTTP_AUTHORIZATION='Token ' + self.token.key)
@@ -120,9 +120,10 @@ class UpdateCameraAPIViewTestCase(APITestCase):
         self.email = 'fokafoka@gmail.com'
         self.password = 'fokimajapletwy'
         self.telephone = '+48606606606'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone)
+            self.username, self.email, self.password, self.telephone, self.language)
 
         self.token = Token.objects.create(user=self.user)
         self.client = Client(HTTP_AUTHORIZATION='Token ' + self.token.key)
@@ -172,9 +173,10 @@ class AddIPAddressAPITestCase(APITestCase):
         self.email = 'fokafoka@gmail.com'
         self.password = 'fokimajapletwy'
         self.telephone = '+48606606606'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone)
+            self.username, self.email, self.password, self.telephone, self.language)
 
         self.token = Token.objects.create(user=self.user)
         self.client = Client(HTTP_AUTHORIZATION='Token ' + self.token.key)

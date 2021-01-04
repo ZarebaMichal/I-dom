@@ -18,9 +18,10 @@ class AddSensorAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
 
         self.token = Token.objects.create(user=self.user)
@@ -86,9 +87,10 @@ class GetListOfSensorsAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
 
         self.token = Token.objects.create(user=self.user)
@@ -129,9 +131,10 @@ class DeleteSensorAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
 
         self.token = Token.objects.create(user=self.user)
@@ -164,9 +167,10 @@ class UpdateSensorAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
 
         self.token = Token.objects.create(user=self.user)
@@ -213,9 +217,10 @@ class ListSensorsDataAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
 
         self.token = Token.objects.create(user=self.user)
@@ -247,9 +252,10 @@ class AddSensorDataAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
 
         self.token = Token.objects.create(user=self.user)
@@ -292,9 +298,10 @@ class GetLastDataAPIViewTestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
 
         self.token = Token.objects.create(user=self.user)
@@ -328,9 +335,10 @@ class ChangeFrequencyAPITestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
 
         self.token = Token.objects.create(user=self.user)
@@ -359,9 +367,10 @@ class AddIpAddressAPITestCase(APITestCase):
         self.email = "chernobyl@gmail.com"
         self.password = "ivdamke"
         self.telephone = '+48999111000'
+        self.language = 'pl'
 
         self.user = CustomUser.objects.create_user(
-            self.username, self.email, self.password, self.telephone
+            self.username, self.email, self.password, self.telephone, self.language
         )
 
         self.token = Token.objects.create(user=self.user)
