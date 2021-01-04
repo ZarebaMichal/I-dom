@@ -10,26 +10,25 @@ from sensors.models import Sensors, SensorsData
 import requests
 
 
-@receiver(pre_save, sender=Sensors)
-def do_something_if_changed(sender, instance, **kwargs):
+@receiver(pre_save, sender=SensorsData)
+def change_frequency(sender, instance, **kwargs):
     try:
-        sensor = Sensors.objects.get(pk=instance.pk)
+        sensor = Sensors.objects.get(pk=instance.sensor.id)
     except ObjectDoesNotExist:
         return 'Sensor doesnt exists'
     else:
-        if not sensor.frequency == instance.frequency:  # Field has changed
-            data_for_sensor = {
-                'name': sensor.name,
-                'frequency': instance.frequency
-            }
-            try:
-                response = requests.post(f'http://{sensor.ip_address}:8000/receive', data=data_for_sensor)
-                response.raise_for_status()
-            except requests.exceptions.ConnectionError:
-                print('Service offline')
+        data_for_sensor = {
+            'name': sensor.name,
+            'frequency': sensor.frequency
+        }
+        try:
+            response = requests.post(f'http://{sensor.ip_address}:8000/receive', data=data_for_sensor)
+            response.raise_for_status()
+        except requests.exceptions.ConnectionError:
+            print('Service offline')
 
-            except requests.exceptions.Timeout:
-                print('Timeout')
+        except requests.exceptions.Timeout:
+            print('Timeout')
 
 
 @receiver(pre_save, sender=SensorsData)

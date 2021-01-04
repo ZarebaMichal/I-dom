@@ -188,21 +188,23 @@ def change_frequency_data(request, pk):
         elif 'frequency' in serializer.errors:
             return Response({'detail': 'Frequency must be between 1 and 21474836'}, status=status.HTTP_400_BAD_REQUEST)
 
-    data_for_sensor = {
-        'id': sensor.id,
-        'frequency': sensor.frequency
-    }
-    try:
-        # ToDo: Change post to valid sensor IP
-        response = requests.post('http://192.168.1.21:8000/receive', data=data_for_sensor)
-        response.raise_for_status()
-    except requests.exceptions.ConnectionError:
-        return Response(data_for_sensor, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-
-    except requests.exceptions.Timeout:
-        return Response(status=status.HTTP_408_REQUEST_TIMEOUT)
-
     return Response(status=status.HTTP_200_OK)
+
+    # data_for_sensor = {
+    #     'id': sensor.id,
+    #     'frequency': sensor.frequency
+    # }
+    # try:
+    #     # ToDo: Change post to valid sensor IP
+    #     response = requests.post('http://192.168.1.21:8000/receive', data=data_for_sensor)
+    #     response.raise_for_status()
+    # except requests.exceptions.ConnectionError:
+    #     return Response(data_for_sensor, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    #
+    # except requests.exceptions.Timeout:
+    #     return Response(status=status.HTTP_408_REQUEST_TIMEOUT)
+    #
+    # return Response(status=status.HTTP_200_OK)
 
 
 @gzip.gzip_page
