@@ -193,6 +193,7 @@ def change_frequency_data(request, pk):
         'frequency': sensor.frequency
     }
     try:
+        # ToDo: Change post to valid sensor IP
         response = requests.post('http://192.168.1.21:8000/receive', data=data_for_sensor)
         response.raise_for_status()
     except requests.exceptions.ConnectionError:

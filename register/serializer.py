@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 from register.models import CustomUser
 from phonenumber_field.serializerfields import PhoneNumberField
 
@@ -11,55 +12,24 @@ class CustomUserSerializer(serializers.Serializer):
     ]
 
     id = serializers.IntegerField(read_only=True)
-    username = serializers.CharField(required=True)
+    username = serializers.CharField(required=True, validators=[UniqueValidator(queryset=CustomUser.objects.all())])
     password1 = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
-    email = serializers.EmailField(required=True)
-    telephone = PhoneNumberField(required=True, trim_whitespace=True, allow_blank=True)
-    sms_notifications = serializers.BooleanField(default=True)
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=CustomUser.objects.all())]
+    )
+    telephone = PhoneNumberField(
+        required=True,
+        trim_whitespace=True,
+        allow_blank=True,
+        validators=[UniqueValidator(queryset=CustomUser.objects.all())]
+    )
+    sms_notifications = serializers.BooleanField(default=False)
     app_notifications = serializers.BooleanField(default=True)
     is_staff = serializers.BooleanField(default=False)
     is_active = serializers.BooleanField(default=True)
-    language = serializers.ChoiceField(choices=LANGUAGES, required=False)
-
-    @staticmethod
-    def validate_email(value):
-        """
-        Check if user with given email already exists in db
-        """""
-        if CustomUser.objects.filter(email=value).exists():
-            raise serializers.ValidationError('Email address already exists')
-        return value
-
-    @staticmethod
-    def validate_username(value):
-        """
-        Check if user with given username already exists in db
-        """
-        if CustomUser.objects.filter(username=value).exists():
-            raise serializers.ValidationError('Username already exists')
-        return value
-
-    @staticmethod
-    def validate_telephone(value):
-        """
-        Check if user with given phone number already exists in db
-
-        """
-        # If telephone number is empty don't check in db
-        if value != '':
-            if CustomUser.objects.filter(telephone=value).exists():
-                raise serializers.ValidationError('Telephone number already exists')
-        return value
-
-    # @staticmethod
-    # def validate_password(validated_data):
-    #     """
-    #     Check if user provided twice correct password
-    #     """
-    #     if validated_data['password1'] != validated_data['password2']:
-    #         raise serializers.ValidationError('Those passwords do not match')
-    #     return validated_data
+    language = serializers.ChoiceField(choices=LANGUAGES, required=True)
 
     def create(self, validated_data):
         """

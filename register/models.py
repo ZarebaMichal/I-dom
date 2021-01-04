@@ -14,7 +14,7 @@ class CustomUser(AbstractUser):
     username = models.CharField(max_length=25, unique=True)
     email = models.EmailField(unique=True)
     telephone = PhoneNumberField(blank=True, null=True)
-    sms_notifications = models.BooleanField(default=True)
+    sms_notifications = models.BooleanField(default=False)
     app_notifications = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
