@@ -10,6 +10,8 @@ from yeelight import Bulb
 from yeelight import BulbException
 import requests
 
+from sensors.models import Sensors
+
 logger = get_task_logger(__name__)
 
 
@@ -99,7 +101,7 @@ def make_action(action_name:str):
                 action.action['blue'])
     elif action.driver.category == 'clicker' or action.driver.category == 'roller_blind':
         turn_clicker(action.driver, action.action['status'])
-        logger.info("Event with flag 3 or 4 has been done on time!")
+    logger.info("Event with flag 3 or 4 has been done on time!")
 
 
 @shared_task(name="action_flag_1")
@@ -134,8 +136,12 @@ def action_flag_1(driver: str, action: dict):
 
 
 @shared_task(name="prep_for_async_tasks_3_and_4")
-def prep_for_async_tasks_3_and_4(sensor, sensor_data):
+def prep_for_async_tasks_3_and_4(sensor_name, sensor_data):
     logger.info("Let's check if there is any falg 3 and 4 task to do!")
+    try:
+        sensor = Sensors.objects.get(name=sensor_name)
+    except Sensors.DoesNotExist:
+        return "There is no such sensor"
     try:
         actions_prep = Actions.objects \
             .select_related('sensor', 'driver') \

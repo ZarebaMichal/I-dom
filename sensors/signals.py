@@ -18,7 +18,7 @@ from actions.tasks import prep_for_async_tasks_3_and_4
 
 @receiver(pre_save, sender=SensorsData)
 def send_to_tasks(sender, instance, **kwargs):
-    prep_for_async_tasks_3_and_4.delay(instance.sensor, instance.sensor_data)
+    prep_for_async_tasks_3_and_4.delay(instance.sensor.name, instance.sensor_data)
 
 
 @receiver(post_save, sender=SensorsData)
