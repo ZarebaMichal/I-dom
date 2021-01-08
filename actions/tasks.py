@@ -1,7 +1,10 @@
 from datetime import datetime
 from celery.utils.log import get_task_logger
 from celery import shared_task
+from decouple import config
 from django.core.exceptions import ObjectDoesNotExist
+from fcm_django.models import FCMDevice
+from pyfcm import FCMNotification
 from actions.models import Actions
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,8 +12,10 @@ from driver.models import Drivers
 from yeelight import Bulb
 from yeelight import BulbException
 import requests
-
+from register.models import CustomUser
 from sensors.models import Sensors
+from twilio.rest import Client
+
 
 logger = get_task_logger(__name__)
 
@@ -136,7 +141,7 @@ def action_flag_1(driver: str, action: dict):
 
 
 @shared_task(name="prep_for_async_tasks_3_and_4")
-def prep_for_async_tasks_3_and_4(sensor_name, sensor_data):
+def prep_for_async_tasks_3_and_4(sensor_name:str, sensor_data:str):
     logger.info("Let's check if there is any falg 3 and 4 task to do!")
     try:
         sensor = Sensors.objects.get(name=sensor_name)
@@ -173,3 +178,156 @@ def prep_for_async_tasks_3_and_4(sensor_name, sensor_data):
     for action in actions:
         if correct_value_check(int(action.trigger), action.operator, int(sensor_data)):
             make_action(str(action.name))
+
+
+@shared_task(name="change_frequency")
+def async_change_frequency(sensor_name:str):
+    try:
+        sensor = Sensors.objects.get(name=sensor_name)
+    except ObjectDoesNotExist:
+        return 'Sensor doesnt exists'
+    else:
+        if sensor.has_changed:
+            data_for_sensor = {
+                'name': sensor.name,
+                'frequency': sensor.frequency
+            }
+
+            try:
+                response = requests.post(f'http://{sensor.ip_address}:8000/receive', data=data_for_sensor)
+                response.raise_for_status()
+                sensor.has_changed = False
+                sensor.save()
+            except requests.exceptions.ConnectionError:
+                print('Service offline')
+                sensor.has_changed = True
+                sensor.save()
+            except requests.exceptions.Timeout:
+                print('Timeout')
+                sensor.has_changed = True
+                sensor.save()
+
+
+@shared_task(name="push_notifications")
+def async_push_notifications(sensor_name:str):
+    try:
+        sensor = Sensors.objects.get(name=sensor_name)
+    except ObjectDoesNotExist:
+        pass
+    else:
+        d = {
+            'gas': ['gas', 'gaz'],
+            'smoke': ['smoke', 'dym'],
+            'rain_sensor': ['rain', 'deszcz']
+        }
+
+        categories = ['smoke', 'gas', 'rain_sensor']
+
+        if sensor.notifications and sensor.category in categories:
+            push_service = FCMNotification(api_key=config('FCM_APIKEY'))
+
+            pl_users_id = [obj.id for obj in CustomUser.objects.filter(language='pl')]
+            eng_users_id = [obj.id for obj in CustomUser.objects.filter(language='eng')]
+
+            pl_fcm_token = [obj.registration_id for obj in FCMDevice.objects.filter(active=True) if
+                            obj.user_id in pl_users_id]
+            eng_fcm_token = [obj.registration_id for obj in FCMDevice.objects.filter(active=True) if
+                             obj.user_id in eng_users_id]
+
+            message_title = f"Czujnik {sensor.name} wykrył {d[sensor.category][1]}"
+            message_body = f"Czujnik {sensor.name} wykrył {d[sensor.category][1]}. Uważaj na siebie!"
+            push_service.notify_multiple_devices(registration_ids=pl_fcm_token,
+                                                 message_title=message_title,
+                                                 message_body=message_body,
+                                                 click_action="FLUTTER_NOTIFICATION_CLICK",
+                                                 android_channel_id="flutter.idom/notifications")
+
+            message_title = f"Sensor {sensor.name} detected {d[sensor.category][0]}"
+            message_body = f"Sensor {sensor.name} detected {d[sensor.category][0]}. Watch out for yourself!"
+            push_service.notify_multiple_devices(registration_ids=eng_fcm_token,
+                                                 message_title=message_title,
+                                                 message_body=message_body,
+                                                 click_action="FLUTTER_NOTIFICATION_CLICK",
+                                                 android_channel_id="flutter.idom/notifications")
+
+
+@shared_task(name="sms_notifications")
+def async_sms_notifications(sensor_name:str):
+    try:
+        sensor = Sensors.objects.get(name=sensor_name)
+    except ObjectDoesNotExist:
+        return "Sensors doesn't exists"
+    else:
+        d = {
+                'gas': 'gaz',
+                'smoke': 'dym',
+                'rain_sensor': ['rain', 'deszcz']
+            }
+
+        categories = ['smoke', 'gas', 'rain_sensor']
+
+        if sensor.notifications and sensor.category in categories:
+            # Get users with sms notifications turned ON and with telephone number
+            try:
+                users = CustomUser.objects.exclude(sms_notifications=False)\
+                                          .exclude(telephone='')\
+                                          .exclude(telephone__isnull=True)
+            except ObjectDoesNotExist:
+                return 'No users with notifications turned ON'
+
+            # Convert users objects to list
+            users_list = list(users)
+            # Load Twilio client
+            client = Client(config('TWILIO_ACCOUNT_SID'), config('TWILIO_AUTH_TOKEN'))
+
+            # Iterate over users to send them SMS
+            for user in users_list:
+                if user.language == 'pl':
+                    element = d['rain_sensor'][1] if sensor.category == 'rain_sensor' else d[sensor.category]
+                    body = f"Czujnik {sensor.name} wykrył {element}"
+                elif user.language == 'eng':
+                    element = d['rain_sensor'][0] if sensor.category == 'rain_sensor' else sensor.category
+                    body = f"Sensor {sensor.name} detected {element}"
+
+                client.messages \
+                      .create(
+                          body=body,
+                          from_=config('TWILIO_NUMBER'),
+                          to=str(user.telephone)
+                             )
+
+
+@shared_task(name="low_battery")
+def async_low_battery_level_notification(sensor_name:str):
+    try:
+        sensor = Sensors.objects.get(name=sensor_name)
+    except ObjectDoesNotExist:
+        return "Sensor doesn't exists"
+
+    else:
+        if sensor.battery_level is not None and sensor.battery_level in (10, 20, 30) and sensor.notifications:
+            push_service = FCMNotification(api_key=config('FCM_APIKEY'))
+
+            pl_users_id = [obj.id for obj in CustomUser.objects.filter(language='pl')]
+            eng_users_id = [obj.id for obj in CustomUser.objects.filter(language='eng')]
+
+            pl_fcm_token = [obj.registration_id for obj in FCMDevice.objects.filter(active=True) if
+                            obj.user_id in pl_users_id]
+            eng_fcm_token = [obj.registration_id for obj in FCMDevice.objects.filter(active=True) if
+                             obj.user_id in eng_users_id]
+
+            message_title = f"W czujniku {sensor.name} jest niski poziom baterii"
+            message_body = f"W czujniku {sensor.name} jest niski poziom baterii, {sensor.battery_level} %"
+            result = push_service.notify_multiple_devices(registration_ids=pl_fcm_token,
+                                                          message_title=message_title,
+                                                          message_body=message_body,
+                                                          click_action="FLUTTER_NOTIFICATION_CLICK",
+                                                          android_channel_id="flutter.idom/notifications")
+
+            message_title = f"Sensor {sensor.name} has low battery level {sensor.battery_level} %"
+            message_body = f"Sensor {sensor.name} has low battery level, {sensor.battery_level} %"
+            result = push_service.notify_multiple_devices(registration_ids=eng_fcm_token,
+                                                          message_title=message_title,
+                                                          message_body=message_body,
+                                                          click_action="FLUTTER_NOTIFICATION_CLICK",
+                                                          android_channel_id="flutter.idom/notifications")
