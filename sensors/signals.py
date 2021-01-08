@@ -256,12 +256,27 @@ def low_battery_level(sender, instance, **kwargs):
     else:
         if sensor.battery_level is not None and sensor.battery_level in (10, 20, 30) and sensor.notifications:
             push_service = FCMNotification(api_key=config('FCM_APIKEY'))
-            fcm_token = [obj.registration_id for obj in FCMDevice.objects.filter(active=True)]
+
+            pl_users_id = [obj.id for obj in CustomUser.objects.filter(language='pl')]
+            eng_users_id = [obj.id for obj in CustomUser.objects.filter(language='eng')]
+
+            pl_fcm_token = [obj.registration_id for obj in FCMDevice.objects.filter(active=True) if
+                            obj.user_id in pl_users_id]
+            eng_fcm_token = [obj.registration_id for obj in FCMDevice.objects.filter(active=True) if
+                             obj.user_id in eng_users_id]
 
             # ToDo: Different messages depending on user language field
-            message_title = f"W czujniku {sensor.name} jest niski poziom baterii, {sensor.battery_level} %"
+            message_title = f"W czujniku {sensor.name} jest niski poziom baterii"
             message_body = f"W czujniku {sensor.name} jest niski poziom baterii, {sensor.battery_level} %"
-            result = push_service.notify_multiple_devices(registration_ids=fcm_token,
+            result = push_service.notify_multiple_devices(registration_ids=pl_fcm_token,
+                                                          message_title=message_title,
+                                                          message_body=message_body,
+                                                          click_action="FLUTTER_NOTIFICATION_CLICK",
+                                                          android_channel_id="flutter.idom/notifications")
+
+            message_title = f"Sensor {sensor.name} has low battery level {sensor.battery_level} %"
+            message_body = f"Sensor {sensor.name} has low battery level, {sensor.battery_level} %"
+            result = push_service.notify_multiple_devices(registration_ids=eng_fcm_token,
                                                           message_title=message_title,
                                                           message_body=message_body,
                                                           click_action="FLUTTER_NOTIFICATION_CLICK",
