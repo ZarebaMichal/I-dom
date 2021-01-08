@@ -13,10 +13,11 @@ from decouple import config
 from twilio.rest import Client
 from sensors.models import Sensors, SensorsData
 import requests
+from actions.tasks import make_action
 
 
 @receiver(pre_save, sender=SensorsData)
-def flag_3_and_4(sender, instance, **kwargs):
+def send_to_tasks(sender, instance, **kwargs):
 
     def correct_value_check(trigger: int, operator: str, sensor_data: int):
         if operator == '>':
@@ -27,7 +28,6 @@ def flag_3_and_4(sender, instance, **kwargs):
             return True if sensor_data == trigger else False
 
     def turn_clicker(driver: str, action: bool):
-        driver = Drivers.objects.get(name=driver)
         try:
             if action:
                 result = requests.post(f'http://{driver.ip_address}/', data=1)
@@ -44,8 +44,7 @@ def flag_3_and_4(sender, instance, **kwargs):
             driver.save()
             return False
 
-    def turn_bulb(driver: str, action: bool):
-        driver = Drivers.objects.get(name=driver)
+    def turn_bulb(driver: dict, action: bool):
         bulb = Bulb(driver.ip_address)
         try:
             if action:
@@ -62,7 +61,6 @@ def flag_3_and_4(sender, instance, **kwargs):
             return False
 
     def set_brightness(driver: str, brightness: int):
-        driver = Drivers.objects.get(name=driver)
         bulb = Bulb(driver.ip_address)
         try:
             bulb.set_brightness(brightness)
@@ -72,8 +70,7 @@ def flag_3_and_4(sender, instance, **kwargs):
             driver.save()
             return False
 
-    def set_colours(driver: str, red: int, green: int, blue: int):
-        driver = Drivers.objects.get(name=driver)
+    def set_colours(driver: dict, red: int, green: int, blue: int):
         bulb = Bulb(driver.ip_address)
         try:
             bulb.set_rgb(red, green, blue)
@@ -89,17 +86,17 @@ def flag_3_and_4(sender, instance, **kwargs):
         return 'Sensor doesnt exists'
 
     try:
-        # DevNote: Discuss with team about days in flag 3
-        actions = Actions.objects.filter(is_active=True,
+        actions_prep = Actions.objects.filter(is_active=True,
                                          flag=3,
-                                         sensor=instance.sensor.name,
-                                         days=int(datetime.today().strftime('%w')))
+                                         sensor=sensor.id)
+
+        actions = [obj for obj in actions_prep if datetime.today().strftime('%w') in obj.days]
     except ObjectDoesNotExist:
         return 'There is not such action'
 
     for action in actions:
         if correct_value_check(int(action.trigger), action.operator, int(instance.sensor_data)):
-            driver = Drivers.object.get(name=action.driver)
+            driver = Drivers.objects.get(pk=action.driver.id)
             if driver.category == 'bulb':
                 if action.action['type'] == 'turn':
                     turn_bulb(driver, action.action['status'])
@@ -117,40 +114,41 @@ def flag_3_and_4(sender, instance, **kwargs):
             elif driver.category == 'clicker' or driver.category == 'roller_blind':
                 turn_clicker(driver, action.action['status'])
 
-    time = datetime.time(datetime.now()).strftime('%H:%M')
-
-    try:
-        # DevNote: Discuss with team about days in flag 4
-        actions = Actions.objects.filter(is_active=True,
-                                         flag=4,
-                                         sensor=instance.sensor.name,
-                                         days=int(datetime.today().strftime('%w')),
-                                         start_event__lt=time,
-                                         end_event__gt=time
-                                         )
-
-    except ObjectDoesNotExist:
-        return 'There is not such action'
-
-    for action in actions:
-        if correct_value_check(int(action.trigger), action.operator, int(instance.sensor_data)):
-            driver = Drivers.object.get(name=action.driver)
-            if driver.category == 'bulb':
-                if action.action['type'] == 'turn':
-                    turn_bulb(driver, action.action['status'])
-                if action.action['type'] == 'brightness':
-                    turn_bulb(driver, True)
-                    set_brightness(driver, action.action['brightness'])
-                if action.action['type'] == 'colour':
-                    turn_bulb(driver, True)
-                    set_colours(
-                        driver,
-                        action.action['red'],
-                        action.action['green'],
-                        action.action['blue']
-                    )
-            elif driver.category == 'clicker' or driver.category == 'roller_blind':
-                turn_clicker(driver, action.action['status'])
+    # time = datetime.time(datetime.now()).strftime('%H:%M')
+    #
+    # try:
+    #     # DevNote: Discuss with team about days in flag 4
+    #     actions = Actions.objects.filter(is_active=True,
+    #                                      flag=4,
+    #                                      sensor=instance.sensor.id,
+    #                                      days=int(datetime.today().strftime('%w')),
+    #                                      start_event__lt=time,
+    #                                      end_event__gt=time
+    #                                      )
+    #     print(f"{actions}")
+    #
+    # except ObjectDoesNotExist:
+    #     return 'There is not such action'
+    #
+    # for action in actions:
+    #     if correct_value_check(int(action.trigger), action.operator, int(instance.sensor_data)):
+    #         driver = Drivers.object.get(name=action.driver)
+    #         if driver.category == 'bulb':
+    #             if action.action['type'] == 'turn':
+    #                 turn_bulb(driver, action.action['status'])
+    #             if action.action['type'] == 'brightness':
+    #                 turn_bulb(driver, True)
+    #                 set_brightness(driver, action.action['brightness'])
+    #             if action.action['type'] == 'colour':
+    #                 turn_bulb(driver, True)
+    #                 set_colours(
+    #                     driver,
+    #                     action.action['red'],
+    #                     action.action['green'],
+    #                     action.action['blue']
+    #                 )
+    #         elif driver.category == 'clicker' or driver.category == 'roller_blind':
+    #             turn_clicker(driver, action.action['status'])
 
 
 @receiver(pre_save, sender=SensorsData)
