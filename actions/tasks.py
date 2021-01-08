@@ -10,8 +10,6 @@ from yeelight import Bulb
 from yeelight import BulbException
 import requests
 
-from sensors.models import Sensors
-
 logger = get_task_logger(__name__)
 
 
@@ -44,7 +42,6 @@ def turn_clicker(driver: str, action: bool):
 
 
 def turn_bulb(driver: str, action: bool):
-    driver = Drivers.objects.get(name=driver)
     bulb = Bulb(driver.ip_address)
     try:
         if action:
@@ -62,7 +59,6 @@ def turn_bulb(driver: str, action: bool):
 
 
 def set_brightness(driver: str, brightness: int):
-    driver = Drivers.objects.get(name=driver)
     bulb = Bulb(driver.ip_address)
     try:
         bulb.set_brightness(brightness)
@@ -74,7 +70,6 @@ def set_brightness(driver: str, brightness: int):
 
 
 def set_colours(driver: str, red: int, green: int, blue: int):
-    driver = Drivers.objects.get(name=driver)
     bulb = Bulb(driver.ip_address)
     try:
         bulb.set_rgb(red, green, blue)
@@ -86,22 +81,25 @@ def set_colours(driver: str, red: int, green: int, blue: int):
 
 
 @shared_task(name="make_action")
-def make_action(action, driver):
-    if driver.category == 'bulb':
-        if action['type'] == 'turn':
-            turn_bulb(driver, action.action['status'])
-        if action['type'] == 'brightness':
-            turn_bulb(driver, True)
-            set_brightness(driver, action.action['brightness'])
-        if action['type'] == 'colour':
-            turn_bulb(driver, True)
+def make_action(action_name:str):
+    logger.info("Let's start with this event with flag 3 or 4!")
+    action = Actions.objects.get(name=action_name)
+    if action.driver.category == 'bulb':
+        if action.action['type'] == 'turn':
+            turn_bulb(action.driver, action.action['status'])
+        if action.action['type'] == 'brightness':
+            turn_bulb(action.driver, True)
+            set_brightness(action.driver, action['brightness'])
+        if action.action['type'] == 'colour':
+            turn_bulb(action.driver, True)
             set_colours(
-                driver,
-                action['red'],
-                action['green'],
-                action['blue'])
-    elif driver.category == 'clicker' or driver.category == 'roller_blind':
-        turn_clicker(driver, action['status'])
+                action.driver,
+                action.action['red'],
+                action.action['green'],
+                action.action['blue'])
+    elif action.driver.category == 'clicker' or action.driver.category == 'roller_blind':
+        turn_clicker(action.driver, action.action['status'])
+        logger.info("Event with flag 3 or 4 has been done on time!")
 
 
 @shared_task(name="action_flag_1")
@@ -135,55 +133,37 @@ def action_flag_1(driver: str, action: dict):
     logger.info("Event has been done on time! (FLAG 1)")
 
 
-# @shared_task(name="prep_for_async_tasks_3_and_4")
-# def prep_for_async_tasks_3_and_4(sensor, sensor_data):
-#     try:
-#         # DevNote: Discuss with team about days in flag 3
-#         actions_prep = Actions.objects.filter(is_active=True,
-#                                          flag=3,
-#                                          sensor=sensor.id)
-#
-#         actions = [obj for obj in actions_prep if datetime.today().strftime('%w') in obj.days]
-#         print(f"{actions}")
-#     except ObjectDoesNotExist:
-#         return 'There is not such action'
-#
-#     for action in actions:
-#         if correct_value_check(int(action.trigger), action.operator, sensor_data):
-#             make_action.delay(action)
-#
-#     # time = datetime.time(datetime.now()).strftime('%H:%M')
-#     #
-#     # try:
-#     #     # DevNote: Discuss with team about days in flag 4
-#     #     actions = Actions.objects.filter(is_active=True,
-#     #                                      flag=4,
-#     #                                      sensor=instance.sensor.id,
-#     #                                      days=int(datetime.today().strftime('%w')),
-#     #                                      start_event__lt=time,
-#     #                                      end_event__gt=time
-#     #                                      )
-#     #     print(f"{actions}")
-#     #
-#     # except ObjectDoesNotExist:
-#     #     return 'There is not such action'
-#     #
-#     # for action in actions:
-#     #     if correct_value_check(int(action.trigger), action.operator, int(instance.sensor_data)):
-#     #         driver = Drivers.object.get(name=action.driver)
-#     #         if driver.category == 'bulb':
-#     #             if action.action['type'] == 'turn':
-#     #                 turn_bulb(driver, action.action['status'])
-#     #             if action.action['type'] == 'brightness':
-#     #                 turn_bulb(driver, True)
-#     #                 set_brightness(driver, action.action['brightness'])
-#     #             if action.action['type'] == 'colour':
-#     #                 turn_bulb(driver, True)
-#     #                 set_colours(
-#     #                     driver,
-#     #                     action.action['red'],
-#     #                     action.action['green'],
-#     #                     action.action['blue']
-#     #                 )
-#     #         elif driver.category == 'clicker' or driver.category == 'roller_blind':
-#     #             turn_clicker(driver, action.action['status'])
+@shared_task(name="prep_for_async_tasks_3_and_4")
+def prep_for_async_tasks_3_and_4(sensor, sensor_data):
+    logger.info("Let's check if there is any falg 3 and 4 task to do!")
+    try:
+        actions_prep = Actions.objects \
+            .select_related('sensor', 'driver') \
+            .filter(
+            is_active=True,
+            flag=3,
+            sensor=sensor.id
+        )
+
+        time = datetime.time(datetime.now())
+        actions_prep_2 = Actions.objects \
+            .select_related('sensor', 'driver') \
+            .filter(
+            is_active=True,
+            flag=4,
+            sensor=sensor.id,
+            start_event__lt=time,
+            end_event__gte=time
+        )
+
+        actions = [obj for obj in actions_prep if datetime.today().strftime('%w') in obj.days]
+        actions2 = [obj for obj in actions_prep_2 if datetime.today().strftime('%w') in obj.days]
+    except ObjectDoesNotExist:
+        logger.info("There is nothing to do here!")
+        return 'There is not such action'
+
+    actions = actions + actions2
+
+    for action in actions:
+        if correct_value_check(int(action.trigger), action.operator, int(sensor_data)):
+            make_action(str(action.name))
