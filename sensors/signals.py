@@ -1,13 +1,8 @@
-from datetime import datetime
-from yeelight import Bulb
-from yeelight import BulbException
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from fcm_django.models import FCMDevice
 from register.models import CustomUser
-from actions.models import Actions
-from driver.models import Drivers
 from pyfcm import FCMNotification
 from decouple import config
 from twilio.rest import Client
