@@ -20,7 +20,7 @@ class SensorsChangeForm(forms.ModelForm):
 
     class Meta:
         model = Sensors
-        fields = ('name', 'category', 'frequency', 'notifications', 'is_active', 'ip_address')
+        fields = ('name', 'category', 'frequency', 'notifications', 'is_active', 'ip_address', 'has_changed')
 
 
 class SensorAdmin(admin.ModelAdmin):
@@ -29,7 +29,7 @@ class SensorAdmin(admin.ModelAdmin):
     """
 
     model = Sensors
-    list_display = ('name', 'id', 'category', 'notifications', 'is_active', 'frequency', 'ip_address', 'battery_level',)
+    list_display = ('name', 'id', 'category', 'notifications', 'is_active', 'frequency', 'ip_address', 'battery_level','has_changed')
     list_filter = ('is_active', 'category', 'notifications',)
     search_fields = ('name', 'category',)
 

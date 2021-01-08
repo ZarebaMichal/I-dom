@@ -128,25 +128,32 @@ def send_to_tasks(sender, instance, **kwargs):
                 turn_clicker(driver, action.action['status'])
 
 
-# @receiver(pre_save, sender=SensorsData)
-# def change_frequency(sender, instance, **kwargs):
-#     try:
-#         sensor = Sensors.objects.get(pk=instance.sensor.id)
-#     except ObjectDoesNotExist:
-#         return 'Sensor doesnt exists'
-#     else:
-#         data_for_sensor = {
-#             'name': sensor.name,
-#             'frequency': sensor.frequency
-#         }
-#         try:
-#             response = requests.post(f'http://{sensor.ip_address}:8000/receive', data=data_for_sensor)
-#             response.raise_for_status()
-#         except requests.exceptions.ConnectionError:
-#             print('Service offline')
-#
-#         except requests.exceptions.Timeout:
-#             print('Timeout')
+@receiver(post_save, sender=SensorsData)
+def change_frequency(sender, instance, **kwargs):
+    try:
+        sensor = Sensors.objects.get(pk=instance.sensor.id)
+    except ObjectDoesNotExist:
+        return 'Sensor doesnt exists'
+    else:
+        if sensor.has_changed:
+            data_for_sensor = {
+                'name': sensor.name,
+                'frequency': sensor.frequency
+            }
+
+            try:
+                response = requests.post(f'http://{sensor.ip_address}:8000/receive', data=data_for_sensor)
+                response.raise_for_status()
+                sensor.has_changed = False
+                sensor.save()
+            except requests.exceptions.ConnectionError:
+                print('Service offline')
+                sensor.has_changed = True
+                sensor.save()
+            except requests.exceptions.Timeout:
+                print('Timeout')
+                sensor.has_changed = True
+                sensor.save()
 
 
 @receiver(pre_save, sender=SensorsData)
