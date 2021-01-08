@@ -81,18 +81,31 @@ def send_to_tasks(sender, instance, **kwargs):
             return False
 
     try:
-        sensor = Sensors.objects.get(pk=instance.sensor.id)
-    except ObjectDoesNotExist:
-        return 'Sensor doesnt exists'
+        actions_prep = Actions.objects\
+            .select_related('sensor', 'driver')\
+            .filter(
+                    is_active=True,
+                    flag=3,
+                    sensor=instance.sensor.id
+                    )
 
-    try:
-        actions_prep = Actions.objects.filter(is_active=True,
-                                         flag=3,
-                                         sensor=sensor.id)
+        time = datetime.time(datetime.now())
+        actions_prep_2 = Actions.objects\
+            .select_related('sensor', 'driver')\
+            .filter(
+                    is_active=True,
+                    flag=4,
+                    sensor=instance.sensor.id,
+                    start_event__lt=time,
+                    end_event__gte=time
+                    )
 
         actions = [obj for obj in actions_prep if datetime.today().strftime('%w') in obj.days]
+        actions2 = [obj for obj in actions_prep_2 if datetime.today().strftime('%w') in obj.days]
     except ObjectDoesNotExist:
         return 'There is not such action'
+
+    actions = actions + actions2
 
     for action in actions:
         if correct_value_check(int(action.trigger), action.operator, int(instance.sensor_data)):
@@ -114,62 +127,26 @@ def send_to_tasks(sender, instance, **kwargs):
             elif driver.category == 'clicker' or driver.category == 'roller_blind':
                 turn_clicker(driver, action.action['status'])
 
-    # time = datetime.time(datetime.now()).strftime('%H:%M')
-    #
-    # try:
-    #     # DevNote: Discuss with team about days in flag 4
-    #     actions = Actions.objects.filter(is_active=True,
-    #                                      flag=4,
-    #                                      sensor=instance.sensor.id,
-    #                                      days=int(datetime.today().strftime('%w')),
-    #                                      start_event__lt=time,
-    #                                      end_event__gt=time
-    #                                      )
-    #     print(f"{actions}")
-    #
-    # except ObjectDoesNotExist:
-    #     return 'There is not such action'
-    #
-    # for action in actions:
-    #     if correct_value_check(int(action.trigger), action.operator, int(instance.sensor_data)):
-    #         driver = Drivers.object.get(name=action.driver)
-    #         if driver.category == 'bulb':
-    #             if action.action['type'] == 'turn':
-    #                 turn_bulb(driver, action.action['status'])
-    #             if action.action['type'] == 'brightness':
-    #                 turn_bulb(driver, True)
-    #                 set_brightness(driver, action.action['brightness'])
-    #             if action.action['type'] == 'colour':
-    #                 turn_bulb(driver, True)
-    #                 set_colours(
-    #                     driver,
-    #                     action.action['red'],
-    #                     action.action['green'],
-    #                     action.action['blue']
-    #                 )
-    #         elif driver.category == 'clicker' or driver.category == 'roller_blind':
-    #             turn_clicker(driver, action.action['status'])
 
-
-@receiver(pre_save, sender=SensorsData)
-def change_frequency(sender, instance, **kwargs):
-    try:
-        sensor = Sensors.objects.get(pk=instance.sensor.id)
-    except ObjectDoesNotExist:
-        return 'Sensor doesnt exists'
-    else:
-        data_for_sensor = {
-            'name': sensor.name,
-            'frequency': sensor.frequency
-        }
-        try:
-            response = requests.post(f'http://{sensor.ip_address}:8000/receive', data=data_for_sensor)
-            response.raise_for_status()
-        except requests.exceptions.ConnectionError:
-            print('Service offline')
-
-        except requests.exceptions.Timeout:
-            print('Timeout')
+# @receiver(pre_save, sender=SensorsData)
+# def change_frequency(sender, instance, **kwargs):
+#     try:
+#         sensor = Sensors.objects.get(pk=instance.sensor.id)
+#     except ObjectDoesNotExist:
+#         return 'Sensor doesnt exists'
+#     else:
+#         data_for_sensor = {
+#             'name': sensor.name,
+#             'frequency': sensor.frequency
+#         }
+#         try:
+#             response = requests.post(f'http://{sensor.ip_address}:8000/receive', data=data_for_sensor)
+#             response.raise_for_status()
+#         except requests.exceptions.ConnectionError:
+#             print('Service offline')
+#
+#         except requests.exceptions.Timeout:
+#             print('Timeout')
 
 
 @receiver(pre_save, sender=SensorsData)
