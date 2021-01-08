@@ -13,119 +13,12 @@ from decouple import config
 from twilio.rest import Client
 from sensors.models import Sensors, SensorsData
 import requests
-from actions.tasks import make_action
+from actions.tasks import prep_for_async_tasks_3_and_4
 
 
 @receiver(pre_save, sender=SensorsData)
 def send_to_tasks(sender, instance, **kwargs):
-
-    def correct_value_check(trigger: int, operator: str, sensor_data: int):
-        if operator == '>':
-            return True if sensor_data > trigger else False
-        elif operator == '<':
-            return True if sensor_data < trigger else False
-        elif operator == '=':
-            return True if sensor_data == trigger else False
-
-    def turn_clicker(driver: str, action: bool):
-        try:
-            if action:
-                result = requests.post(f'http://{driver.ip_address}/', data=1)
-                result.raise_for_status()
-                driver.data = True
-            else:
-                result = requests.post(f'http://{driver.ip_address}/', data=0)
-                result.raise_for_status()
-                driver.data = False
-            driver.save()
-            return True
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            driver.data = False
-            driver.save()
-            return False
-
-    def turn_bulb(driver: dict, action: bool):
-        bulb = Bulb(driver.ip_address)
-        try:
-            if action:
-                bulb.turn_on()
-                driver.data = True
-            else:
-                bulb.turn_off()
-                driver.data = False
-            driver.save()
-            return True
-        except BulbException:
-            driver.data = False
-            driver.save()
-            return False
-
-    def set_brightness(driver: str, brightness: int):
-        bulb = Bulb(driver.ip_address)
-        try:
-            bulb.set_brightness(brightness)
-            return True
-        except BulbException:
-            driver.data = False
-            driver.save()
-            return False
-
-    def set_colours(driver: dict, red: int, green: int, blue: int):
-        bulb = Bulb(driver.ip_address)
-        try:
-            bulb.set_rgb(red, green, blue)
-            return True
-        except BulbException:
-            driver.data = False
-            driver.save()
-            return False
-
-    try:
-        actions_prep = Actions.objects\
-            .select_related('sensor', 'driver')\
-            .filter(
-                    is_active=True,
-                    flag=3,
-                    sensor=instance.sensor.id
-                    )
-
-        time = datetime.time(datetime.now())
-        actions_prep_2 = Actions.objects\
-            .select_related('sensor', 'driver')\
-            .filter(
-                    is_active=True,
-                    flag=4,
-                    sensor=instance.sensor.id,
-                    start_event__lt=time,
-                    end_event__gte=time
-                    )
-
-        actions = [obj for obj in actions_prep if datetime.today().strftime('%w') in obj.days]
-        actions2 = [obj for obj in actions_prep_2 if datetime.today().strftime('%w') in obj.days]
-    except ObjectDoesNotExist:
-        return 'There is not such action'
-
-    actions = actions + actions2
-
-    for action in actions:
-        if correct_value_check(int(action.trigger), action.operator, int(instance.sensor_data)):
-            driver = Drivers.objects.get(pk=action.driver.id)
-            if driver.category == 'bulb':
-                if action.action['type'] == 'turn':
-                    turn_bulb(driver, action.action['status'])
-                if action.action['type'] == 'brightness':
-                    turn_bulb(driver, True)
-                    set_brightness(driver, action.action['brightness'])
-                if action.action['type'] == 'colour':
-                    turn_bulb(driver, True)
-                    set_colours(
-                        driver,
-                        action.action['red'],
-                        action.action['green'],
-                        action.action['blue']
-                    )
-            elif driver.category == 'clicker' or driver.category == 'roller_blind':
-                turn_clicker(driver, action.action['status'])
+    prep_for_async_tasks_3_and_4.delay(instance.sensor.name, instance.sensor_data)
 
 
 @receiver(post_save, sender=SensorsData)
