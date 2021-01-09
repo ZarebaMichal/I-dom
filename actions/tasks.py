@@ -119,22 +119,21 @@ def action_flag_1(driver: str, action: dict):
 
     if driver_instance.category == 'bulb':
         if action['type'] == 'turn':
-            turn_bulb(driver, action['status'])
+            turn_bulb(driver_instance, action['status'])
         if action['type'] == 'brightness':
             turn_bulb(driver, True)
-            set_brightness(driver, action['brightness'])
+            set_brightness(driver_instance, action['brightness'])
         if action['type'] == 'colour':
-            turn_bulb(driver, True)
+            turn_bulb(driver_instance, True)
             set_colours(
-                    driver,
+                    driver_instance,
                     action['red'],
                     action['green'],
                     action['blue']
                     )
     elif driver_instance.category == 'clicker' or driver_instance.category == 'roller_blind':
-        turn_clicker(driver, action['status'])
+        turn_clicker(driver_instance, action['status'])
 
-    # ToDo: Other categories
     # driver_instance.data = False
     # driver_instance.save()
     logger.info("Event has been done on time! (FLAG 1)")
