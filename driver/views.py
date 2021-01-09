@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from driver.models import Drivers
-from driver.serializer import DriversSerializer
+from driver.serializer import DriversSerializer, DriversReadOnlySerializer
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
 from django.views.decorators import gzip
@@ -27,7 +27,8 @@ def list_of_drivers(request):
     :return: list of all drivers if ok http 200 response
     """
     driver = Drivers.objects.filter(is_active=True)
-    serializer = DriversSerializer(driver, many=True)
+    #serializer = DriversSerializer(driver, many=True)
+    serializer = DriversReadOnlySerializer(driver, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 

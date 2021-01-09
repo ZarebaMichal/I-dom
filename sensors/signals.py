@@ -26,4 +26,4 @@ def sms_notifications(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Sensors)
 def low_battery_level(sender, instance, **kwargs):
-    actions.tasks.async_low_battery_level_notification.delay(instance.sensor.name)
+    actions.tasks.async_low_battery_level_notification.delay(instance.name)

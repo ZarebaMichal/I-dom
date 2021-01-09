@@ -116,3 +116,22 @@ class SensorsDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = SensorsData
         fields = ("sensor", "delivery_time", "sensor_data")
+
+
+class SensorsReadOnlySerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    category = serializers.CharField(read_only=True)
+    battery_level = serializers.IntegerField(read_only=True)
+    notifications = serializers.BooleanField(read_only=True)
+    is_active = serializers.BooleanField(read_only=True)
+    frequency = serializers.IntegerField(read_only=True)
+    ip_address = serializers.IPAddressField(read_only=True)
+    has_changed = serializers.BooleanField(read_only=True)
+    
+    
+class SensorsDataReadOnlySerializer(serializers.Serializer):
+    sensor = serializers.SlugRelatedField(read_only=True, slug_field='name')
+    delivery_time = serializers.DateTimeField(read_only=True)
+    sensor_data = serializers.CharField(read_only=True)
+

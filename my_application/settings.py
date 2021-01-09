@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     'twilio',
     'webpack_loader',
     'driver',
-    'silk',
     'djqscsv',
     'actions',
     'django_celery_beat',
@@ -84,7 +83,6 @@ SWAGGER_SETTINGS = {
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    'silk.middleware.SilkyMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -192,8 +190,6 @@ EMAIL_PORT = config('EMAIL_PORT')
 EMAIL_USE_TLS = config('EMAIL_USE_TLS')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-SILKY_PYTHON_PROFILER = True
-SILKY_META = True
 
 # CELERY STUFF
 CELERY_BROKER_URL = 'amqp://test:test@localhost:5672/rbbitmq'

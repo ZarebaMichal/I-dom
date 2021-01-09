@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from register.models import CustomUser
-from register.serializer import CustomUserSerializer, UpdateCustomUserSerializer
+from register.serializer import CustomUserSerializer, UpdateCustomUserSerializer, CustomUserReadOnlySerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from .permissions import IsUpdateProfile
@@ -20,7 +20,8 @@ def users_list(request, format=None):
     """
     if request.method == 'GET':
         users = CustomUser.objects.filter(is_active=True) if request.user.is_staff else CustomUser.objects.filter(id=request.user.id)
-        serializer = CustomUserSerializer(users, many=True)
+        serializer = CustomUserReadOnlySerializer(users, many=True)
+        #serializer = CustomUserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

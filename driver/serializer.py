@@ -78,3 +78,11 @@ class DriversSerializer(DynamicDriversSerializer):
 
         return instance
 
+
+class DriversReadOnlySerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    category = serializers.CharField(read_only=True)
+    is_active = serializers.BooleanField(read_only=True)
+    ip_address = serializers.IPAddressField(read_only=True)
+    data = serializers.BooleanField(read_only=True)

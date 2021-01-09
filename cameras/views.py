@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from django.shortcuts import render
 from django.http.response import StreamingHttpResponse, HttpResponse
 from cameras.models import Cameras
-from cameras.serializer import CamerasSerializer
+from cameras.serializer import CamerasSerializer, CamerasReadOnlySerializer
 from turbojpeg import TurboJPEG
 from datetime import datetime
 from rest_framework.permissions import IsAuthenticated
@@ -68,7 +68,8 @@ def list_of_cameras(request, format=None):
     :return: list of all sensors if ok http 200 response
     """
     cameras = Cameras.objects.filter(is_active=True)
-    serializer = CamerasSerializer(cameras, many=True)
+    #serializer = CamerasSerializer(cameras, many=True)
+    serializer = CamerasReadOnlySerializer(cameras, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 

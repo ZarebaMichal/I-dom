@@ -6,7 +6,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from sensors import models
 from sensors.models import Sensors, SensorsData
-from sensors.serializer import SensorsSerializer, SensorsDataSerializer
+from sensors.serializer import SensorsSerializer, SensorsDataSerializer, SensorsReadOnlySerializer, \
+    SensorsDataReadOnlySerializer
 from rest_framework.permissions import IsAuthenticated
 import requests
 from django.core.exceptions import ObjectDoesNotExist
@@ -25,7 +26,8 @@ def list_of_sensors(request, format=None):
     :return: list of all sensors if ok http 200 response
     """
     sensors = Sensors.objects.filter(is_active=True)
-    serializer = SensorsSerializer(sensors, many=True)
+   #serializer = SensorsSerializer(sensors, many=True)
+    serializer = SensorsReadOnlySerializer(sensors, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -127,7 +129,8 @@ def list_of_sensors_data(request, format=None):
     :return: list of all sensors if ok http 200 response
     """
     sensors_data = SensorsData.objects.select_related('sensor')
-    serializer = SensorsDataSerializer(sensors_data, many=True)
+    #serializer = SensorsDataSerializer(sensors_data, many=True)
+    serializer = SensorsDataReadOnlySerializer(sensors_data, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -189,22 +192,6 @@ def change_frequency_data(request, pk):
             return Response({'detail': 'Frequency must be between 1 and 21474836'}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response(status=status.HTTP_200_OK)
-
-    # data_for_sensor = {
-    #     'id': sensor.id,
-    #     'frequency': sensor.frequency
-    # }
-    # try:
-    #     # ToDo: Change post to valid sensor IP
-    #     response = requests.post('http://192.168.1.21:8000/receive', data=data_for_sensor)
-    #     response.raise_for_status()
-    # except requests.exceptions.ConnectionError:
-    #     return Response(data_for_sensor, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-    #
-    # except requests.exceptions.Timeout:
-    #     return Response(status=status.HTTP_408_REQUEST_TIMEOUT)
-    #
-    # return Response(status=status.HTTP_200_OK)
 
 
 @gzip.gzip_page

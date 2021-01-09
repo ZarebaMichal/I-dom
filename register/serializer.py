@@ -119,3 +119,15 @@ class UpdateCustomUserSerializer(DynamicUpdateCustomUserSerializer):
         instance.save()
 
         return instance
+
+
+class CustomUserReadOnlySerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    username = serializers.CharField(read_only=True)
+    email = serializers.EmailField(read_only=True)
+    telephone = PhoneNumberField(read_only=True)
+    sms_notifications = serializers.BooleanField(read_only=True)
+    app_notifications = serializers.BooleanField(read_only=True)
+    is_staff = serializers.BooleanField(read_only=True)
+    is_active = serializers.BooleanField(read_only=True)
+    language = serializers.BooleanField(read_only=True)

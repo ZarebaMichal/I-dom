@@ -78,3 +78,11 @@ class CamerasSerializer(DynamicSensorsSerializer):
         instance.save()
 
         return instance
+
+
+class CamerasReadOnlySerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    notifications = serializers.BooleanField(read_only=True)
+    is_active = serializers.BooleanField(read_only=True)
+    ip_address = serializers.IPAddressField(read_only=True)
