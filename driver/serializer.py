@@ -30,10 +30,11 @@ class DriversSerializer(DynamicDriversSerializer):
     name = serializers.CharField(max_length=30, required=False)
     category = serializers.ChoiceField(choices=CATEGORIES, required=False)
     data = serializers.BooleanField(allow_null=True, required=False)
+    ip_address = serializers.IPAddressField(required=False, allow_null=True)
 
     class Meta:
         model = Drivers
-        fields = ['id', 'name', 'category', 'ip_address', 'data']
+        fields = ['id', 'name', 'category','ip_address', 'data']
 
     @staticmethod
     def validate_name(value):
@@ -58,7 +59,8 @@ class DriversSerializer(DynamicDriversSerializer):
 
         driver = Drivers.objects.create(name=validated_data.get('name'),
                                         category=validated_data.get('category'),
-                                        data=validated_data.get('data')
+                                        data=validated_data.get('data'),
+                                        ip_address=validated_data.get('ip_address')
                                         )
         driver.save()
         return driver
