@@ -21,6 +21,7 @@ server {
         server_name localhost;
 
         location / {
+                try_files $uri $uri/ /index.html?/$request_uri;
                 root /home/ubuntu/Frontend/idom/build;
                         index index.html index.htm;
         }
