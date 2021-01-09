@@ -10,9 +10,9 @@ import sys
 import os
 
 # important for deploying
-path =  ('/home/ubuntu/I-dom/I-DOM')
-
-sys.path.append('/home/ubuntu/I-dom/lib/python3.8/site-packages/')
+path =  ('/home/pi/I-dom/I-DOM')
+# import CHECK FEW TIMES IF USER IS CORRECT
+sys.path.append('/home/pi/I-dom/lib/python3.7/site-packages/')
 #sys.path.append('/home/ubuntu/I-dom/my_application')
 if path not in sys.path:
         sys.path.append(path)
