@@ -18,7 +18,7 @@ from django.utils import timezone
 
 @gzip.gzip_page
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+#@permission_classes([IsAuthenticated])
 def list_of_sensors(request, format=None):
     """
     Get list of all sensors, only for authenticated users
@@ -121,7 +121,7 @@ def delete_sensor(request, pk, format=None):
 
 @gzip.gzip_page
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+#@permission_classes([IsAuthenticated])
 def list_of_sensors_data(request, format=None):
     """
     Get list of all sensors data, only for authenticated users
