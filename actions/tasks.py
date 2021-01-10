@@ -96,7 +96,7 @@ def make_action(action_name:str):
             turn_bulb(action.driver, action.action['status'])
         if action.action['type'] == 'brightness':
             turn_bulb(action.driver, True)
-            set_brightness(action.driver, action['brightness'])
+            set_brightness(action.driver, action.action['brightness'])
         if action.action['type'] == 'colour':
             turn_bulb(action.driver, True)
             set_colours(
@@ -121,7 +121,7 @@ def action_flag_1(driver: str, action: dict):
         if action['type'] == 'turn':
             turn_bulb(driver_instance, action['status'])
         if action['type'] == 'brightness':
-            turn_bulb(driver, True)
+            turn_bulb(driver_instance, True)
             set_brightness(driver_instance, action['brightness'])
         if action['type'] == 'colour':
             turn_bulb(driver_instance, True)
