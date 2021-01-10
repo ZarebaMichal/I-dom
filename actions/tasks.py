@@ -93,7 +93,10 @@ def make_action(action_name:str):
     action = Actions.objects.get(name=action_name)
     if action.driver.category == 'bulb':
         if action.action['type'] == 'turn':
-            turn_bulb(action.driver, action.action['status'])
+            if action.action['status'] == "on":
+                turn_bulb(action.driver, True)
+            elif action.action['status'] == "off":
+                turn_bulb(action.driver, False)
         if action.action['type'] == 'brightness':
             turn_bulb(action.driver, True)
             set_brightness(action.driver, action.action['brightness'])
@@ -119,7 +122,10 @@ def action_flag_1(driver: str, action: dict):
 
     if driver_instance.category == 'bulb':
         if action['type'] == 'turn':
-            turn_bulb(driver_instance, action['status'])
+            if action['status'] == "on":
+                turn_bulb(driver_instance, True)
+            elif action['status'] == "off":
+                turn_bulb(driver_instance, False)
         if action['type'] == 'brightness':
             turn_bulb(driver_instance, True)
             set_brightness(driver_instance, action['brightness'])
