@@ -1,13 +1,9 @@
 import json
-from datetime import datetime
-
 from rest_framework import serializers
 from driver.models import Drivers
 from sensors.models import Sensors
 from actions.models import Actions
 from django_celery_beat.models import CrontabSchedule, PeriodicTask
-from actions.tasks import action_flag_1
-
 
 
 class DynamicActionsSerializer(serializers.ModelSerializer):

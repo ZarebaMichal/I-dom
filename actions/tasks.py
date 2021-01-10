@@ -30,7 +30,6 @@ def correct_value_check(trigger: int, operator: str, sensor_data: float):
 
 
 def turn_clicker(driver: str, action: bool):
-    driver = Drivers.objects.get(name=driver)
     try:
         if action:
             result = requests.post(f'http://{driver.ip_address}/', data=1)

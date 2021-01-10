@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from actions.models import Actions
 from actions.serializer import ActionsSerializer
+from django_celery_beat.models import PeriodicTask
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
 
@@ -114,8 +115,20 @@ def delete_action(request, pk):
         action = Actions.objects.get(pk=pk)
     except Actions.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+
     time = str(datetime.now())
     time = time.replace(" ", "")
+
+    if action.flag == 1:
+        try:
+            periodic_task = PeriodicTask.objects.get(name=action.name)
+        except PeriodicTask.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        periodic_task.name = time
+        periodic_task.enabled = False
+        periodic_task.save()
+
     action.name = time
     action.is_active = False
     action.save()
