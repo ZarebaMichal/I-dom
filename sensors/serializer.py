@@ -128,6 +128,18 @@ class SensorsReadOnlySerializer(serializers.Serializer):
     frequency = serializers.IntegerField(read_only=True)
     ip_address = serializers.IPAddressField(read_only=True)
     has_changed = serializers.BooleanField(read_only=True)
+    last_data = serializers.SerializerMethodField()
+
+    def get_last_data(self, obj):
+        """
+        Check for last data added for sensor
+        :param obj:
+        :return:
+        """
+        last_data = obj.sensorsdata_set.last()
+        if last_data is not None:
+            return last_data.sensor_data
+        return None
     
     
 class SensorsDataReadOnlySerializer(serializers.Serializer):

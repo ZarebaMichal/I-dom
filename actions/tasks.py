@@ -20,7 +20,7 @@ from twilio.rest import Client
 logger = get_task_logger(__name__)
 
 
-def correct_value_check(trigger: int, operator: str, sensor_data: int):
+def correct_value_check(trigger: int, operator: str, sensor_data: float):
     if operator == '>':
         return True if sensor_data > trigger else False
     elif operator == '<':
@@ -175,7 +175,7 @@ def prep_for_async_tasks_3_and_4(sensor_name:str, sensor_data:str):
     actions = actions + actions2
 
     for action in actions:
-        if correct_value_check(int(action.trigger), action.operator, int(sensor_data)):
+        if correct_value_check(int(action.trigger), action.operator, float(sensor_data)):
             make_action(str(action.name))
 
 
