@@ -130,4 +130,4 @@ class CustomUserReadOnlySerializer(serializers.Serializer):
     app_notifications = serializers.BooleanField(read_only=True)
     is_staff = serializers.BooleanField(read_only=True)
     is_active = serializers.BooleanField(read_only=True)
-    language = serializers.BooleanField(read_only=True)
+    language = serializers.CharField(read_only=True)
