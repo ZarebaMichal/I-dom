@@ -318,7 +318,7 @@ def data_to_csv(request):
 
 
 @gzip.gzip_page
-@api_view(['PUT'])
+@api_view(['POST'])
 def update_battery_sensor(request, format=None):
     """
     Update battery level of sensor
