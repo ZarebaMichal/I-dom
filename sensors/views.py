@@ -319,7 +319,7 @@ def data_to_csv(request):
 
 @gzip.gzip_page
 @api_view(['PUT'])
-def update_battery_sensor(request, name, format=None):
+def update_battery_sensor(request, format=None):
     """
     Update battery level of sensor
     :param request: PUT
@@ -329,11 +329,11 @@ def update_battery_sensor(request, name, format=None):
             else if succeeded return 200
     """
     try:
-        sensor = Sensors.objects.get(name=name)
+        sensor = Sensors.objects.get(name=request.data['name'])
     except Sensors.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    serializer = SensorsSerializer(sensor, data=request.data)
+    serializer = SensorsSerializer(sensor, data=request.data['battery_level'])
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
