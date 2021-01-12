@@ -332,8 +332,12 @@ def update_battery_sensor(request, format=None):
         sensor = Sensors.objects.get(name=request.data['name'])
     except Sensors.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    data = {
+        "battery_level": request.data['battery_level']
+        }
 
-    serializer = SensorsSerializer(sensor, data=request.data['battery_level'])
+    serializer = SensorsSerializer(sensor, data=data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
