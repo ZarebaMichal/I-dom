@@ -267,7 +267,7 @@ def data_to_csv(request):
         if par not in request.data:
             return Response(f'You have to provide {par}', status=status.HTTP_400_BAD_REQUEST)
 
-    if int(request.data['days']) not in range(0, 30):
+    if int(request.data['days']) not in range(0, 31):
         return Response('Choose between 1-30 days', status=status.HTTP_400_BAD_REQUEST)
 
     # User provides only sensor categories
