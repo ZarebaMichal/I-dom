@@ -17,7 +17,10 @@ class VideoCamera(object):
         obj = super(VideoCamera,cls).__new__(cls)
         obj._from_base_class = type(obj) == VideoCamera
         try:
-            cam = 'http://' + str(kwargs['ip']) + ':8080' + '/video'
+            # dev version
+            #cam = 'http://' + str(kwargs['ip']) + ':8080' + '/video'
+            # prod version
+            cam = 'rtsp://' + str(kwargs['ip']) + ':8554/mjpeg/1'
             video = cv2.VideoCapture(cam)
             if not video.isOpened() or video is None:
                 return
