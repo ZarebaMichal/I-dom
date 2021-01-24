@@ -173,8 +173,9 @@ def send_action(request):
     except ObjectDoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+    data = {"data": 1}
     try:
-        result = requests.post(f'http://{driver.ip_address}/', data=1)
+        result = requests.post(f'http://{driver.ip_address}:8000/receive', data=data)
         result.raise_for_status()
     except exceptions.NewConnectionError:
         return Response(status=status.HTTP_503_SERVICE_UNAVAILABLE)
