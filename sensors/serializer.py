@@ -29,6 +29,7 @@ class SensorsSerializer(DynamicSensorsSerializer):
         ('rain_sensor', 'rain_sensor'),
         ('air_humidity', 'air_humidity'),
         ('atmo_pressure', 'atmo_pressure'),
+        ('motion_sensor', 'motion_sensor'),
     ]
 
     id = serializers.IntegerField(read_only=True)
