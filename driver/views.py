@@ -13,6 +13,7 @@ from yeelight import BulbException
 from datetime import datetime
 import requests
 from urllib3 import exceptions
+from requests.exceptions import ConnectionError
 
 
 # <--------- LIST OF DRIVERS ---------> #
@@ -178,6 +179,8 @@ def send_action(request):
         result = requests.post(f'http://{driver.ip_address}:8000/receive', data=data)
         result.raise_for_status()
     except exceptions.NewConnectionError:
+        return Response(status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    except ConnectionError as e:
         return Response(status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
     return Response(result)
