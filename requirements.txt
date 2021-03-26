@@ -92,7 +92,7 @@ python-dateutil==2.8.1
 python-crontab==2.5.1
 PyTurboJPEG @ git+git://github.com/lilohuang/PyTurboJPEG.git@614e1edd155f468ecce10ccfa8efba82d960d1ae
 pytz==2019.3
-PyYAML==5.3.1
+PyYAML==5.4
 pyzmq==19.0.2
 random-username==1.0.2
 render==1.0.0
