@@ -112,7 +112,7 @@ twilio==6.47.0
 txFCM==0.0.1
 unicodecsv==0.14.1
 uritemplate==3.0.1
-urllib3==1.25.9
+urllib3==1.26.5
 values==2019.4.13
 vine==5.0.0
 virtualenv==20.0.18
