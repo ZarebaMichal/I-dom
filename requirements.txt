@@ -49,7 +49,7 @@ gevent==20.9.0
 geventhttpclient==1.4.4
 gprof2dot==2019.11.30
 greenlet==0.4.17
-httpie==2.1.0
+httpie==3.1.0
 hyperlink==20.0.1
 idna==2.9
 ifaddr==0.1.7
